@@ -27,7 +27,6 @@ export class Token extends Node implements Hashable {
     equals(other: unknown): boolean {
         if (this === other) return true;
         if (!(other instanceof Token)) return false;
-
         return JavaObjects.equals(this.text, other.text);
     }
 

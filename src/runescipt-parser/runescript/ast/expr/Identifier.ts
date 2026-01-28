@@ -22,14 +22,13 @@ export class Identifier extends Expression implements Hashable {
         return visitor.visitIdentifier(this);
     }
 
-    public hashCode(): number {
+    hashCode(): number {
         return JavaObjects.hash(this.text);
     }
 
     equals(other: unknown): boolean {
         if (this === other) return true;
         if (!(other instanceof Identifier)) return false;
-
         return JavaObjects.equals(this.text, other.text);
     }
 

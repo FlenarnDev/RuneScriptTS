@@ -24,7 +24,6 @@ export class Parameter extends Node implements Hashable {
         this.typeToken = typeToken;
         this.name = name;
 
-        // Mirror Kotlin init
         this.addChild(typeToken);
         this.addChild(name);
     }
@@ -33,21 +32,20 @@ export class Parameter extends Node implements Hashable {
         return visitor.visitParameter(this);
     }
 
-    public hashCode(): number {
+    hashCode(): number {
         return JavaObjects.hash(this.typeToken, this.name);
     }
 
-    public equals(other: unknown): boolean {
+    equals(other: unknown): boolean {
         if (this === other) return true;
         if (!(other instanceof Parameter)) return false;
-
         return (
             JavaObjects.equals(this.typeToken, other.typeToken) &&
             JavaObjects.equals(this.name, other.name)
         );
     }
 
-    public toString(): string {
+    toString(): string {
         return new ToStringHelper(this)
             .add("typeToken", this.typeToken)
             .add("name", this.name)

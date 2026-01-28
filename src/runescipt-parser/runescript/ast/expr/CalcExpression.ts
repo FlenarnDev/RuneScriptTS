@@ -20,7 +20,6 @@ export class CalcExpression extends Expression implements Hashable {
         super(source);
         this.expression = expression;
 
-        // Mirror Kotlin
         this.addChild(expression);
     }
 
@@ -28,18 +27,17 @@ export class CalcExpression extends Expression implements Hashable {
         return visitor.visitCalcExpression(this);
     }
 
-    public hashCode(): number {
+    hashCode(): number {
         return JavaObjects.hash(this.expression);
     }
 
-    public equals(other: unknown): boolean {
+    equals(other: unknown): boolean {
         if (this === other) return true;
         if (!(other instanceof CalcExpression)) return false;
-
         return JavaObjects.equals(this.expression, other.expression);
     }
 
-    public toString(): string {
+    toString(): string {
         return new ToStringHelper(this)
             .add("expression", this.expression)
             .toString();
