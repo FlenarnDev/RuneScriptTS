@@ -1,0 +1,19 @@
+{
+  "name": "runescriptts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "antlr": "bunx antlr4ts-cli -visitor -listener -Xexact-output-dir -o src/antlr/out src/antlr/RuneScriptLexer.g4 src/antlr/RuneScriptParser.g4",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "bun run antlr && bun run build"
+  },
+  "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4"
+  },
+  "devDependencies": {
+    "antlr4ts-cli": "^0.5.0-alpha.4",
+    "typescript": "^5.3.0"
+  }
+}
