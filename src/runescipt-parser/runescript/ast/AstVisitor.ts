@@ -1,3 +1,4 @@
+import { CalcExpression } from './expr/CalcExpression';
 import { Expression } from './expr/Expression';
 import { Identifier } from './expr/Identifier';
 import { Node } from './Node';
@@ -16,6 +17,10 @@ export abstract class AstVisitor<R> {
 
     visitExpression(expression: Expression): R {
         return this.visitNode(expression);
+    }
+
+    visitCalcExpression(calcExpression: CalcExpression): R {
+        return this.visitExpression(calcExpression);
     }
 
     visitIdentifier(identifier: Identifier): R {
