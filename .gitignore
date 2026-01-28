@@ -1,0 +1,6 @@
+.*
+!.git*
+
+src/antlr/out
+
+node_modules
