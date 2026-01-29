@@ -10,86 +10,67 @@ import { SymbolType } from './SymbolType';
  * @see createSubTable
  */
 export class SymbolTable {
-   /**
-     * Table of all symbols defined in the table. This does not include symbols
-     * defined in a parent.
-     */
-    private symbols: Map<string, Map<string, Symbol>> = new Map();
-    private parent: SymbolTable | null;
+  private symbols: Map<string, Map<string, Symbol>> = new Map();
 
-    // Default constructor that just defines null parent.
-    constructor(parent: SymbolTable | null = null) {
-        this.parent = null;
+  constructor(private parent: SymbolTable | null = null) {}
+
+  /**
+   * Inserts [symbol] into the table and indicates if the insertion was successful.
+   */
+  insert<T extends Symbol>(type: SymbolType<T>, symbol: T): boolean {
+    const key = type.kind;
+
+    // Check up the parent chain to prevent shadowing
+    let current: SymbolTable | null = this;
+    while (current) {
+      const table = current.symbols.get(key);
+      if (table?.has(symbol.name)) {
+        return false;
+      }
+      current = current.parent;
     }
 
-    /**
-     * Inserts [symbol] into the table and indicates if the insertion was
-     * successful.
-     */
-    insert<T extends Symbol>(type: SymbolType<T>, symbol: T): boolean {
-        // Prevent shadowing of symbols with the same type by traversing up
-        // the tree to check if the symbol exists in any of them
-        let current: SymbolTable | null = this;
-        while (current) {
-            const typeMap = current.symbols.get(type.kind);
-            if (typeMap && typeMap.has(symbol.name)) {
-                return false; // Symbol already exists
-            }
-            current = current.parent;
-        }
-
-        // Insert in current table
-        let typeMap = this.symbols.get(type.kind);
-        if (!typeMap) {
-            typeMap = new Map<string, Symbol>();
-            this.symbols.set(type.kind, typeMap);
-        }
-        typeMap.set(symbol.name, symbol);
-        return true;
+    if (!this.symbols.has(key)) {
+      this.symbols.set(key, new Map());
     }
 
-   /**
-     * Searches for a symbol with [name] and [type]. If one is not found the
-     * search it applied to the parent table recursively.
-     */
-    find<T extends Symbol>(type: SymbolType<T>, name: string): T | undefined {
-        const typeMap = this.symbols.get(type.kind);
-        if (typeMap && typeMap.has(name)) {
-            return typeMap.get(name) as T;
-        }
-        return this.parent?.find(type, name);
+    this.symbols.get(key)!.set(symbol.name, symbol);
+    return true;
+  }
+
+  /**
+   * Searches for a symbol with [name] and [type].
+   */
+  find<T extends Symbol>(type: SymbolType<T>, name: string): T | null {
+    const table = this.symbols.get(type.kind);
+    const symbol = table?.get(name) as T | undefined;
+
+    if (symbol) return symbol;
+    return this.parent?.find(type, name) ?? null;
+  }
+
+  /**
+   * Searches for all symbols with the given name,
+   * optionally restricted by kind.
+   */
+  findAll<T extends Symbol>(name: string, type?: { new (...args: any[]): T }): T[] {
+    const results: T[] = [];
+    for (const table of this.symbols.values()) {
+      const symbol = table.get(name);
+      if (symbol && (!type || symbol instanceof type)) {
+        results.push(symbol as T);
+      }
     }
-
-    /**
-     * Searches for all symbols in the table and all parent tables with the name of [name],
-     * and optionally a [type].
-     */
-    findAll<T extends Symbol>(
-        name: string,
-        typeKind?: SymbolType<T>['kind']
-    ): T[] {
-        const results: T[] = [];
-
-        for (const [kind, typeMap] of this.symbols) {
-            if (!typeKind || kind === typeKind) {
-                const symbol = typeMap.get(name);
-                if (symbol && (!typeKind || (symbol as any).kind === typeKind)) {
-                    results.push(symbol as T);
-                }
-            }
-        }
-
-        if (this.parent) {
-            results.push(...(this.parent.findAll(name, typeKind) as T[]));
-        }
-
-        return results;
+    if (this.parent) {
+      results.push(...this.parent.findAll(name, type));
     }
+  return results;
+  }
 
-    /**
-     * Creates a new [SymbolType] with `this` as the parent.
-     */
-    createSubTable(): SymbolTable {
-        return new SymbolTable(this);
-    }
+  /**
+   * Creates a sub-table with this as the parent.
+   */
+  createSubTable(): SymbolTable {
+    return new SymbolTable(this);
+  }
 }

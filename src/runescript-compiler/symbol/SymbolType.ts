@@ -1,13 +1,19 @@
-import { LocalVariableSymbol, Symbol } from './Symbol';
 import { TriggerType } from '../trigger/TriggerType';
 import { Type } from '../type/Type';
+import { ScriptSymbol } from './ScriptSymbol';
+import { BasicSymbol, ConstantSymbol, LocalVariableSymbol } from './Symbol';
 
-export type SymbolType<T extends Symbol> =
-    // Script-specific
-    | { kind: 'ServerScript'; type: TriggerType; __symbol?: never } // replace never with your ServerScriptSymbol if you define one
-    | { kind: 'ClientScript'; type: TriggerType; __symbol?: never }
-    // Script-local variable
-    | { kind: 'LocalVariable' } // corresponds to LocalVariableSymbol
-    // Global symbols
-    | { kind: 'Basic'; type: Type } // corresponds to BasicSymbol
-    | { kind: 'Constant' };        // corresponds to ConstantSymbol
+export type SymbolType<T> =
+    | { kind: "ServerScript"; type: TriggerType }
+    | { kind: "ClientScript"; type: TriggerType }
+    | { kind: "LocalVariable" }
+    | { kind: "Basic"; type: Type }
+    | { kind: "Constant"};
+
+export const SymbolType = {
+    serverScript: (type: TriggerType): SymbolType<ScriptSymbol> => ({ kind: "ServerScript", type }),
+    clientScript: (type: TriggerType): SymbolType<ScriptSymbol> => ({ kind: "ClientScript", type }),
+    localVariable: (): SymbolType<LocalVariableSymbol> => ({ kind: "LocalVariable" }),
+    basic: (type: Type): SymbolType<BasicSymbol> => ({ kind: "Basic", type }),
+    constant: (): SymbolType<ConstantSymbol> => ({ kind: "Constant" }),
+}

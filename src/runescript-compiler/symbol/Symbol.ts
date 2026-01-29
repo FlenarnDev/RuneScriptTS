@@ -6,32 +6,28 @@ import { Type } from '../type/Type';
  *
  * @see SymbolTable
  */
-export type Symbol =
-    | LocalVariableSymbol
-    | BasicSymbol
-    | ConstantSymbol;
+export interface Symbol {
+    readonly name: string;
+}
 
 /**
  * Script local variables
  */
-export interface LocalVariableSymbol {
-    kind: 'LocalVariableSymbol';
-    name: string;
-    type: Type;
+export class LocalVariableSymbol implements Symbol {
+    constructor(public readonly name: string, public readonly type: Type) {}
 }
 
 /**
  * Symbols with constant values, new ones sohuld also be included in TypeChecking.isConstantSymbol
  */
-export interface BasicSymbol {
-    kind: 'BasicSymbol';
-    name: string;
-    type: Type;
-    protected?: boolean;
+export class BasicSymbol implements Symbol {
+    constructor(
+        public readonly name: string,
+        public readonly type: Type,
+        public readonly isProtected: boolean = false
+    ) {}
 }
 
-export interface ConstantSymbol {
-    kind: 'ConstantSymbol';
-    name: string;
-    value: string;
+export class ConstantSymbol implements Symbol {
+    constructor(public readonly name: string, public readonly value: string) {}
 }

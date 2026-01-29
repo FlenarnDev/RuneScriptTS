@@ -1,7 +1,6 @@
 import { Hashable } from "./Hashable";
 import { javaStringHash } from "./JavaStringHash";
 
-
 export class JavaObjects {
   static hash(...values: unknown[]): number {
     let result = 1;

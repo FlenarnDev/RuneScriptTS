@@ -1,4 +1,3 @@
-import { Script } from '../../runescipt-parser/ast/Scripts';
 import { TriggerType } from '../trigger/TriggerType';
 import { BaseVarType } from './BaseVarType';
 import { Type as MainType } from './Type';
