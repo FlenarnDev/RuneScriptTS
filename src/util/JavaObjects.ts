@@ -1,5 +1,6 @@
-import { Hashable } from './Hashable.ts';
-import { javaStringHash } from './JavaStringHash.ts';
+import { Hashable } from "./Hashable";
+import { javaStringHash } from "./JavaStringHash";
+
 
 export class JavaObjects {
   static hash(...values: unknown[]): number {
