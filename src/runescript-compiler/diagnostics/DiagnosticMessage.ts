@@ -37,7 +37,7 @@ export const DiagnosticMessage = {
     SCRIPT_TRIGGER_EXPECTED_RETURNS: "The trigger type '%s' is expected to return (%s).",
     SCRIPT_SUBJECT_ONLY_GLOBAL: "Trigger '%s' only allows global subjects.",
     SCRIPT_SUBJECT_NO_GLOBAL: "Trigger '%s' does not allow global subjects.",
-    SCRIPT_SUBJECT_NO_CAT: "Trigger '%s' does not allow category subjects.",
+    SCRIPT_SUBJECT_NO_CATEGORY: "Trigger '%s' does not allow category subjects.",
 
     // Switch statement node specific
     SWITCH_INVALID_TYPE: "'%s' is not allowed within a switch statement.",
