@@ -1,9 +1,10 @@
+import { SubjectMode } from './SubjectMode';
 import { TriggerType } from './TriggerType';
 
 export const CommandTrigger: TriggerType = {
     id: -1,
     identifier: 'command',
-    subjectMode: { kind: 'Name' },
+    subjectMode: SubjectMode.Name,
     allowParameters: true,
     parameters: null,
     allowReturns: true,
