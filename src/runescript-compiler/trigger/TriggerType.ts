@@ -35,7 +35,7 @@ export interface TriggerType {
     /**
      * The parameters that must be defined. If `null` no arguments are expected.
      */
-    parameters: Type;
+    parameters: Type | null;
 
     /**
      * Whether returns are allowed in scripts using the trigger.
