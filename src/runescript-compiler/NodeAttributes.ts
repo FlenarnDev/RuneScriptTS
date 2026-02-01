@@ -17,6 +17,7 @@ import { BasicSymbol, LocalVariableSymbol } from './symbol/Symbol';
 import { SymbolTable } from './symbol/SymbolTable';
 import { TriggerType } from './trigger/TriggerType';
 import { Type } from './type/Type';
+import { Symbol } from './symbol/Symbol';
 
 /**
  * ==================
