@@ -8,7 +8,8 @@ import { Type } from '../Type';
  *
  * @see ArrayType
  */
-export interface WrappedType extends Type {
+export abstract class WrappedType extends Type {
+    
     /**
      * The inner type that is being wrapped.
      */

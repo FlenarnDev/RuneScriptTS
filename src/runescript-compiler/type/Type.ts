@@ -7,7 +7,7 @@ import { MutableOptionsType, TypeOptions } from './TypeOptions';
  * @see PrimitiveType
  * @see TupleType
  */
-export interface Type {
+export abstract class Type {
     /**
      * A string used to represent the type. This is what is used in scripts to reference it. E.g. `def_int` or `int`
      * would rely on there being a type with a representation of `int`.
