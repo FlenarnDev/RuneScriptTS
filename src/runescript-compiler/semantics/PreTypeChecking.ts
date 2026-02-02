@@ -6,12 +6,10 @@ import { Script } from '../../runescipt-parser/ast/Scripts';
 import { BlockStatement } from '../../runescipt-parser/ast/statement/BlockStatement';
 import { SwitchCase } from '../../runescipt-parser/ast/statement/SwitchCase';
 import { SwitchStatement } from '../../runescipt-parser/ast/statement/SwitchStatement';
-import { Diagnostic } from '../diagnostics/Diagnostic';
 import { DiagnosticMessage } from '../diagnostics/DiagnosticMessage';
 import { Diagnostics } from '../diagnostics/Diagnostics';
-import { DiagnosticType } from '../diagnostics/DiagnosticType';
 import { getParameterSymbol, getScriptParameterType, getScriptReturnType, setBlockScope, setParameterSymbol, setScriptParameterType, setScriptReturnType, setScriptScope, setScriptSubjectReference, setScriptSymbol, setScriptTriggerType, setSwitchCaseScope, setSwitchType } from '../NodeAttributes';
-import { ScriptSymbol, ServerScriptSymbol } from '../symbol/ScriptSymbol';
+import { ServerScriptSymbol } from '../symbol/ScriptSymbol';
 import { BasicSymbol, LocalVariableSymbol } from '../symbol/Symbol';
 import { SymbolTable } from '../symbol/SymbolTable';
 import { SymbolType } from '../symbol/SymbolType';
@@ -24,6 +22,7 @@ import { PrimitiveType } from '../type/PrimitiveType';
 import { TupleType } from '../type/TupleType';
 import { Type } from '../type/Type';
 import { TypeManager } from '../type/TypeManager';
+import { reportError } from '../diagnostics/DiagnosticHelpers';
 
 /**
  * An [AstVisitor] implementation that handles the following.
@@ -93,7 +92,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         const trigger = this.triggerManager.findOrNull(script.trigger.text);
 
         if (!trigger) {
-            this.reportError(script.trigger, DiagnosticMessage.SCRIPT_TRIGGER_INVALID, script.trigger.text);
+            reportError(this.diagnostics, script.trigger, DiagnosticMessage.SCRIPT_TRIGGER_INVALID, script.trigger.text);
         } else {
             setScriptTriggerType(script, trigger);
         }
@@ -104,7 +103,7 @@ export class PreTypeChecking extends AstVisitor<void> {
              * The only reason the '*' symbol is allowed is to allow defining cases like
              * "npc_queue" and "npc_queue*" as two different commands since they have different semantics.
              */
-            this.reportError(script.name, DiagnosticMessage.SCRIPT_COMMAND_ONLY);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_COMMAND_ONLY);
         }
 
         // Verify subject matched what the triggers requires.
@@ -127,7 +126,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             for (const token of returnTokens) {
                 const type = this.typeManager.findOrNull(token.text);
                 if (!type) {
-                    this.reportError(token, DiagnosticMessage.GENERIC_INVALID_TYPE, token.text);
+                    reportError(this.diagnostics, token, DiagnosticMessage.GENERIC_INVALID_TYPE, token.text);
                 }
                 returns.push(type ?? MetaType.Error);
             }
@@ -151,7 +150,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
             const inserted = this.rootTable.insert(SymbolType.serverScript(trigger), scriptSymbol);
             if (!inserted) {
-                this.reportError(script, DiagnosticMessage.SCRIPT_REDECLARATION, trigger.identifier, script.nameString);
+                reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_REDECLARATION, trigger.identifier, script.nameString);
             } else {
                 // Only set the symbol if it was actually inserted
                 setScriptSymbol(script, scriptSymbol);
@@ -204,14 +203,14 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            this.reportError(script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
         // Subject references a type, verify it allows global subject.
         if (this.isTypeMode(mode)) {
             if (!mode.global) {
-                this.reportError(script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_GLOBAL, trigger.identifier);
+                reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_GLOBAL, trigger.identifier);
             }
             return;
         }
@@ -229,14 +228,14 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            this.reportError(script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
         // Subject references a type, verify it allows category subject.
         if (this.isTypeMode(mode)) {
             if (!mode.category) {
-                this.reportError(script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_CATEGORY, trigger.identifier);
+                reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_CATEGORY, trigger.identifier);
                 return;
             }
 
@@ -256,7 +255,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            this.reportError(script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
@@ -274,7 +273,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Format: 'level_mx_mz'
         const parts = coord.split("_");
         if (parts.length !== 3) {
-            this.reportError(script.name, "Mapzone subject must be of the form: 'level_mx_mz'.")
+            reportError(this.diagnostics, script.name, "Mapzone subject must be of the form: 'level_mx_mz'.")
             return -1;
         }
 
@@ -284,11 +283,11 @@ export class PreTypeChecking extends AstVisitor<void> {
         const mzInt = parseInt(mz, 10);
 
         if (mxInt < 0 || mxInt > 255 || mzInt < 0 || mzInt > 255) {
-            this.reportError(script.name, "Invalid mapzone coord.");
+            reportError(this.diagnostics, script.name, "Invalid mapzone coord.");
         }
 
         if (levelInt !== 0) {
-            this.reportError(script.name, "Mapzone affect all level, just specify '0'.");
+            reportError(this.diagnostics, script.name, "Mapzone affect all level, just specify '0'.");
             return -1;
         }
 
@@ -302,7 +301,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Format: 'level_mx_mz_lx_lz'
         const parts = coord.split("_");
         if (parts.length !== 5) {
-            this.reportError(script.name, "Zone subject must be of the form: 'level_mx_mz_lx_lz'.")
+            reportError(this.diagnostics, script.name, "Zone subject must be of the form: 'level_mx_mz_lx_lz'.")
             return -1;
         }
 
@@ -320,11 +319,11 @@ export class PreTypeChecking extends AstVisitor<void> {
             lxInt < 0 || lxInt > 63 ||
             lzInt < 0 || lzInt > 63 
         ) {
-            this.reportError(script.name, "Invalid zone coord.");
+            reportError(this.diagnostics, script.name, "Invalid zone coord.");
         }
 
         if (lxInt % 8 !== 0 || lzInt % 8 !== 0) {
-            this.reportError(script.name, "Local zone coord must be a multiple of 8");
+            reportError(this.diagnostics, script.name, "Local zone coord must be a multiple of 8");
             return -1;
         }
 
@@ -352,12 +351,12 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         const symbol = this.rootTable.find(SymbolType.basic(type), subject);
         if (!symbol) {
-            this.reportError(script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
             return;
         }
 
         if (!('type' in symbol && 'isProtected' in symbol)) {
-            this.reportError(script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
+            reportError(this.diagnostics, script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
             return;
         }
 
@@ -372,10 +371,10 @@ export class PreTypeChecking extends AstVisitor<void> {
         const scriptParameterType = getScriptParameterType(script);
 
         if (trigger && !trigger.allowParameters && parameters && parameters.length > 0) {
-            this.reportError(parameters[0], DiagnosticMessage.SCRIPT_TRIGGER_NO_PARAMETERS, trigger.identifier);
+            reportError(this.diagnostics, parameters[0], DiagnosticMessage.SCRIPT_TRIGGER_NO_PARAMETERS, trigger.identifier);
         } else if (triggerParameterType && scriptParameterType !== triggerParameterType) {
             const expectedPArameterType = triggerParameterType.representation;
-            this.reportError(script, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_PARAMETERS, script.trigger.text, expectedPArameterType);
+            reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_PARAMETERS, script.trigger.text, expectedPArameterType);
         }
     }
 
@@ -387,10 +386,11 @@ export class PreTypeChecking extends AstVisitor<void> {
         const scriptReturns = getScriptReturnType(script);
 
         if (trigger && !trigger.allowReturns && scriptReturns !== MetaType.Nothing) {
-            this.reportError(script, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
+            reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
         } else if (triggerReturns && scriptReturns !== triggerReturns) {
             const exprectedReturnTypes = triggerReturns.representation;
-            this.reportError(
+            reportError(
+                this.diagnostics,
                 script,
                 DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_RETURNS,
                 script.trigger.text,
@@ -406,7 +406,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Type isn't valid, report the error.
         if (!type) {
-            this.reportError(parameter, DiagnosticMessage.GENERIC_INVALID_TYPE, typeText);
+            reportError(this.diagnostics, parameter, DiagnosticMessage.GENERIC_INVALID_TYPE, typeText);
         }
 
         // Attempt to inster the local variable into the symbol talbe and display error if failed to insert.
@@ -414,7 +414,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         const inserted = this.table.insert(SymbolType.localVariable(), symbol);
 
         if (!inserted) {
-            this.reportError(parameter, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
+            reportError(this.diagnostics, parameter, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
         setParameterSymbol(parameter, symbol);
@@ -436,9 +436,9 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Notify invalid type.
         if (!type) {
-            this.reportError(switchStatement.typeToken, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
+            reportError(this.diagnostics, switchStatement.typeToken, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
         } else if (!type.options.allowSwitch){
-            this.reportError(switchStatement.typeToken, DiagnosticMessage.SWITCH_INVALID_TYPE, type.representation);
+            reportError(this.diagnostics, switchStatement.typeToken, DiagnosticMessage.SWITCH_INVALID_TYPE, type.representation);
         }
 
         // Visit the condition to resolve any reference.
@@ -467,27 +467,6 @@ export class PreTypeChecking extends AstVisitor<void> {
 
     override visitNode(node: Node): void {
         this.visit(node.children)
-    }
-
-    /**
-     * Helper function to report a diagnostic with the type of [DiagnosticType.INFO].
-     */
-    private reportInfo(node: Node, message: string, ...args: unknown[]) {
-        this.diagnostics.report(new Diagnostic(DiagnosticType.INFO, node, message, ...args));
-    }
-
-    /**
-     * Helper function to report a diagnostic with the type of [DiagnosticType.WARNING].
-     */
-    private reportWarning(node: Node, message: string, ...args: unknown[]) {
-        this.diagnostics.report(new Diagnostic(DiagnosticType.WARNING, node, message, ...args));
-    }
-
-    /**
-     * Helper function to report a diagnostic with the type of [DiagnosticType.ERROR].
-     */
-    private reportError(node: Node, message: string, ...args: unknown[]) {
-        this.diagnostics.report(new Diagnostic(DiagnosticType.ERROR, node, message, ...args))
     }
 
     /**
