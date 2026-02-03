@@ -155,7 +155,7 @@ export class ScriptCompiler{
     }
 
     /**
-     * Runs the compiler bo loading external symbols then actual
+     * Runs the compiler by loading external symbols then actual
      * running the compile process.
      */
     public run(ext: string): void {
@@ -201,6 +201,7 @@ export class ScriptCompiler{
         }
 
         // 5) Write scripts
+        this.write(scripts);
     }
 
     /**
@@ -342,7 +343,43 @@ export class ScriptCompiler{
     private write(scripts: RuneScript[]) {
         this.logger.debug("Starting script writing.");
         const scriptWriterStart = performance.now();
-        // 
+        for (const script of scripts) {
+            if (this.isExcluded(script.sourceName)) {
+                this.logger.trace(`Skipping writing of excluded file: ${script.sourceName}`);
+                continue;
+            }
+
+            const scriptWriteTimeStart = performance.now();
+            this.scriptWriter.write(script);
+            const scriptWriteTime = (performance.now() - scriptWriteTimeStart).toFixed(2);
+            this.logger.debug(`Wrote ${script.fullName} in ${scriptWriteTime}ms.`);
+        }
+        const scriptWriterTime = (performance.now() - scriptWriterStart).toFixed(2);
+    }
+
+    /**
+     * Checks if [sourceName] is within any of the excluded paths.
+     * Invalid [Path]s return with `false`.
+     */
+    private isExcluded(sourceName: string): boolean {
+        let sourcePath: string;
+
+        try {
+            // Normalize + resolve
+            sourcePath = path.normalize(path.resolve(sourceName));
+        } catch {
+            // Not a valid source path so the exclusions are not relevant.
+            return false;
+        }
+
+        return this.excludePaths.some(excluded => {
+            const excludedPath = path.normalize(excluded);
+
+            return(
+                sourcePath === excludedPath ||
+                sourcePath.startsWith(excludedPath + path.sep)
+            );
+        });
     }
 
     /**
