@@ -1,5 +1,6 @@
-import * as fs from 'fs';
-import { CharStreams, CommonTokenStream } from 'antlr4ts';
+import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
+import { CharStream, CharStreams, CommonTokenStream } from 'antlr4ts';
 import { ANTLRErrorListener } from 'antlr4ts/ANTLRErrorListener';
 import { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import { ScriptFile } from '../ast/ScriptFile';
@@ -10,21 +11,31 @@ import { Script } from '../ast/Scripts';
 import { AstBuilder } from './AstBuilder';
 
 export class ScriptParser {
-  static createScriptFile(
+  public static createScriptFile(
     inputPath: string,
     errorListener?: ANTLRErrorListener<any>
   ): ScriptFile | null {
-    const source = fs.readFileSync(inputPath, "utf8");
-    const normalized = inputPath;
-
+    const source = readFileSync(inputPath, "utf8");
     return this.invokeParser(
-      CharStreams.fromString(source, normalized),
+      CharStreams.fromString(source, inputPath),
       parser => parser.scriptFile(),
       errorListener
     ) as ScriptFile | null;
   }
 
-  static createScriptFileFromString(
+  public static async createScriptFileAsync(
+    inputPath: string,
+    errorListener?: ANTLRErrorListener<any>
+  ): Promise<ScriptFile | null> {
+    const source = await readFile(inputPath, "utf8");
+    return this.invokeParser(
+      CharStreams.fromString(source, inputPath),
+      (parser) => parser.scriptFile(),
+      errorListener
+    ) as ScriptFile | null;
+  }
+
+  public static createScriptFileFromString(
     scriptFile: string,
     errorListener?: ANTLRErrorListener<any>
   ): ScriptFile | null {
@@ -35,7 +46,7 @@ export class ScriptParser {
     ) as ScriptFile | null;
   }
 
-  static createScript(
+  public static createScript(
     script: string,
     errorListener?: ANTLRErrorListener<any>
   ): Script | null {
@@ -46,8 +57,8 @@ export class ScriptParser {
     ) as Script | null;
   }
 
-  static invokeParser(
-    stream: ReturnType<typeof CharStreams.fromString>,
+  public static invokeParser(
+    stream: CharStream,
     entry: (parser: RuneScriptParser) => ParserRuleContext,
     errorListener?: ANTLRErrorListener<any>,
     lineOffset = 0,
@@ -57,7 +68,7 @@ export class ScriptParser {
     const tokens = new CommonTokenStream(lexer);
     const parser = new RuneScriptParser(tokens);
 
-    // setup error listeners
+    // Setup error listeners
     if (errorListener) {
       lexer.removeErrorListeners();
       lexer.addErrorListener(errorListener);
@@ -68,15 +79,11 @@ export class ScriptParser {
 
     const tree = entry(parser);
 
-    // if there were any errors detected, return null for the whole node
+    // If there were any errors detected, return null for the whole node
     if (parser.numberOfSyntaxErrors > 0) {
       return null;
     }
 
-    return new AstBuilder(
-      stream.sourceName,
-      lineOffset,
-      columnOffset
-    ).visit(tree);
+    return new AstBuilder(stream.sourceName, lineOffset, columnOffset).visit(tree);
   }
 }
