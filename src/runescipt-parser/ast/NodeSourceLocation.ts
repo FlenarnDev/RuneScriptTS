@@ -1,8 +1,4 @@
-import { Hashable } from "../../util/Hashable";
-import { JavaObjects } from "../../util/JavaObjects";
-import { ToStringHelper } from "../../util/ToStringHelper";
-
-export class NodeSourceLocation implements Hashable {
+export class NodeSourceLocation {
   public readonly name: string;
   public readonly line: number;
   public readonly column: number;
@@ -11,27 +7,5 @@ export class NodeSourceLocation implements Hashable {
     this.name = name;
     this.line = line;
     this.column = column;
-  }
-
-  hashCode(): number {
-    return JavaObjects.hash(this.name, this.line, this.column);
-  }
-
-  equals(other: unknown): boolean {
-    if (this === other) return true;
-    if (!(other instanceof NodeSourceLocation)) return false;
-    return (
-      JavaObjects.equals(this.name, other.name) &&
-      JavaObjects.equals(this.line, other.line) &&
-      JavaObjects.equals(this.column, other.column)
-    );
-  }
-
-  toString(): string {
-    return new ToStringHelper(this)
-      .add("name", this.name)
-      .add("line", this.line)
-      .add("column", this.column)
-      .toString();
   }
 }

@@ -1,7 +1,3 @@
-
-import { Hashable } from '../../../util/Hashable';
-import { JavaObjects } from '../../../util/JavaObjects';
-import { ToStringHelper } from '../../../util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { NodeSourceLocation } from '../NodeSourceLocation';
 import { Expression } from './Expression';
@@ -15,7 +11,7 @@ import { StringPart } from './StringPart';
  * "The value of $var is <$var>."
  * ```
  */
-export class JoinedStringExpression extends Expression implements Hashable {
+export class JoinedStringExpression extends Expression {
     public readonly parts: StringPart[];
 
     constructor(source: NodeSourceLocation, parts: StringPart[]) {
@@ -27,29 +23,5 @@ export class JoinedStringExpression extends Expression implements Hashable {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitJoinedStringExpression(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(...this.parts);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof JoinedStringExpression)) return false;
-        if (this.parts.length !== other.parts.length) return false;
-
-        for (let i = 0; i < this.parts.length; i++) {
-            if (!JavaObjects.equals(this.parts[i], other.parts[i])) {
-                return false;
-            }
-        }
-
-    return true;
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-        .add("parts", this.parts)
-        .toString();
     }
 }

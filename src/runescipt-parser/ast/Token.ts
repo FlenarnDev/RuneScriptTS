@@ -2,14 +2,11 @@
 import { NodeSourceLocation } from './NodeSourceLocation';
 import { Node } from './Node';
 import { AstVisitor } from './AstVisitor';
-import { Hashable } from '../../util/Hashable';
-import { JavaObjects } from '../../util/JavaObjects';
-import { ToStringHelper } from '../../util/ToStringHelper';
 
 /**
  * A simple node that contains an antlr [org.antlr.v4.runtime.Token] text.
  */
-export class Token extends Node implements Hashable {
+export class Token extends Node {
     public readonly text: string;
 
     constructor(source: NodeSourceLocation, text: string) {
@@ -19,21 +16,5 @@ export class Token extends Node implements Hashable {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitToken(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.text);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof Token)) return false;
-        return JavaObjects.equals(this.text, other.text);
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("text", this.text)
-            .toString();
     }
 }

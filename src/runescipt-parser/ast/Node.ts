@@ -45,7 +45,7 @@ export abstract class Node {
     }
 
     if (node.parent !== null) {
-      throw new Error("parent already set");
+      throw new Error("Parent already set.");
     }
 
     node.parent = this;
@@ -62,7 +62,7 @@ export abstract class Node {
       }
 
       if (node.parent !== null) {
-        throw new Error("parent already set");
+        throw new Error("Parent already set.");
       }
 
       node.parent = this;
@@ -109,11 +109,6 @@ export abstract class Node {
   public removeAttribute(key: string): void {
     this.attributes.delete(key);
   }
-
-  // mark abstract so all nodes have to implement
-  public abstract hashCode(): number;
-  public abstract equals(other: unknown): boolean;
-  public abstract toString(): string;
 
   /**
    * Returns a getter/setter pair for accessing attributes.

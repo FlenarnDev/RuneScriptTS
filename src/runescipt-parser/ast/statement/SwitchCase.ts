@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../../util/JavaObjects';
-import { ToStringHelper } from '../../../util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { Node } from '../Node';
@@ -38,26 +36,5 @@ export class SwitchCase extends Node {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitSwitchCase(this);    
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.keys, this.statements);    
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof SwitchCase)) return false;
-
-        return (
-            JavaObjects.equals(this.keys, other.keys) &&
-            JavaObjects.equals(this.statements, other.statements)
-        );
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("keys", this.keys)
-            .add("statements", this.statements)
-            .toString();
     }
 }

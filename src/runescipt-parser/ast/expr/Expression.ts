@@ -7,7 +7,7 @@ import { NodeSourceLocation } from '../NodeSourceLocation';
  * The base expression node that all expressions extend.
  */
 export abstract class Expression extends Node {
-    constructor(source: NodeSourceLocation) {
+    protected constructor(source: NodeSourceLocation) {
         super(source);
     }
 

@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../runescript/util/JavaObjects';
-import { ToStringHelper } from '../../runescript/util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { NodeSourceLocation } from '../NodeSourceLocation';
@@ -42,28 +40,5 @@ export class IfStatement extends Statement {
 
     accept<R>(visitor: AstVisitor<R>): R {
          return visitor.visitIfStatement(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.condition, this.thenStatement, this.elseStatement);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof IfStatement)) return false;
-        
-        return (
-            JavaObjects.equals(this.condition, other.condition) &&
-            JavaObjects.equals(this.thenStatement, other.thenStatement) &&
-            JavaObjects.equals(this.elseStatement, other.elseStatement)
-        );
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("condition", this.condition)
-            .add("thenStatement", this.thenStatement)
-            .add("elseStatement", this.elseStatement)
-            .toString();
     }
 }

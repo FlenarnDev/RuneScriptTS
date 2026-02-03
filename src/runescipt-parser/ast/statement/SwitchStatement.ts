@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../../util/JavaObjects';
-import { ToStringHelper } from '../../../util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { NodeSourceLocation } from '../NodeSourceLocation';
@@ -43,28 +41,5 @@ export class SwitchStatement extends Statement {
     
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitSwitchStatement(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.typeToken, this.condition, this.cases);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof SwitchStatement)) return false;
-
-        return (
-            JavaObjects.equals(this.typeToken, other.typeToken) &&
-            JavaObjects.equals(this.condition, other.condition) &&
-            JavaObjects.equals(this.cases, other.cases)
-        );
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("typeToken", this.typeToken)
-            .add("condition", this.condition)
-            .add("cases", this.cases)
-            .toString();
     }
 }

@@ -1,6 +1,4 @@
 
-import { JavaObjects } from '../../util/JavaObjects';
-import { ToStringHelper } from '../../util/ToStringHelper';
 import { AstVisitor } from './AstVisitor';
 import { Identifier } from './expr/Identifier';
 import { Node } from './Node';
@@ -73,39 +71,4 @@ export class Script extends Node {
     accept<R>(visitor: AstVisitor<R>): R {
       return visitor.visitScript(this);
     }
-
-    hashCode(): number {
-      return JavaObjects.hash(
-        this.trigger,
-        this.name,
-        this.isStar,
-        this.parameters,
-        this.returnTokens,
-        this.statements
-      );
-    }
-
-    equals(other: unknown): boolean {
-      if (this === other) return true;
-      if (!(other instanceof Script)) return false;
-      return (
-          JavaObjects.equals(this.trigger, other.trigger) &&
-          JavaObjects.equals(this.name, other.name) &&
-          this.isStar === other.isStar &&
-          JavaObjects.equals(this.parameters, other.parameters) &&
-          JavaObjects.equals(this.returnTokens, other.returnTokens) &&
-          JavaObjects.equals(this.statements, other.statements)
-      );
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-          .add("trigger", this.trigger)
-          .add("name", this.name)
-          .add("isStar", this.isStar)
-          .add("parameters", this.parameters)
-          .add("returnTokens", this.returnTokens)
-          .add("statements", this.statements)
-          .toString();
-    } 
 }

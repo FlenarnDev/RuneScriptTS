@@ -1,5 +1,3 @@
-import { Hashable } from '../../../runescript/util/Hashable';
-import { JavaObjects } from '../../../runescript/util/JavaObjects';
 import { AstVisitor } from '../../AstVisitor';
 import { NodeSourceLocation } from '../../NodeSourceLocation';
 import { Expression } from '../Expression';
@@ -9,7 +7,7 @@ import { CallExpression } from './CallExpression';
 /**
  * A CallExpression for command calls.
  */
-export class CommandCallExpression extends CallExpression implements Hashable {
+export class CommandCallExpression extends CallExpression {
   public readonly arguments2?: Expression[];
 
   constructor(
@@ -36,19 +34,5 @@ export class CommandCallExpression extends CallExpression implements Hashable {
 
   accept<R>(visitor: AstVisitor<R>): R {
     return visitor.visitCommandCallExpression(this);
-  }
-
-  hashCode(): number {
-    return JavaObjects.hash(this.name, this.arguments, this.arguments2);
-  }
-
-  equals(other: unknown): boolean {
-    if (this === other) return true;
-    if (!(other instanceof CommandCallExpression)) return false;
-    return (
-      JavaObjects.equals(this.name, other.name) &&
-      JavaObjects.equals(this.arguments, other.arguments) &&
-      JavaObjects.equals(this.arguments2, other.arguments2)
-    );
   }
 }

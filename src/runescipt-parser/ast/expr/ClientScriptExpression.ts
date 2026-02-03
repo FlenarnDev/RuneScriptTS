@@ -1,6 +1,3 @@
-import { Hashable } from '../../../util/Hashable';
-import { JavaObjects } from '../../../util/JavaObjects';
-import { ToStringHelper } from '../../../util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { NodeSourceLocation } from '../NodeSourceLocation';
 import { CallExpression } from './call/CallExpression';
@@ -15,7 +12,7 @@ import { Identifier } from './Identifier';
  * some_handler(){var1}
  * ```
  */
-export class ClientScriptExpression extends CallExpression implements Hashable {
+export class ClientScriptExpression extends CallExpression  {
   public readonly transmitList: Expression[];
 
   constructor(
@@ -32,27 +29,5 @@ export class ClientScriptExpression extends CallExpression implements Hashable {
 
   accept<R>(visitor: AstVisitor<R>): R {
     return visitor.visitClientScriptExpression(this);
-  }
-
-  hashCode(): number {
-    return JavaObjects.hash(this.name, this.arguments, this.transmitList);
-  }
-
-  equals(other: unknown): boolean {
-    if (this === other) return true;
-    if (!(other instanceof ClientScriptExpression)) return false;
-    return (
-      JavaObjects.equals(this.name, other.name) &&
-      JavaObjects.equals(this.arguments, other.arguments) &&
-      JavaObjects.equals(this.transmitList, other.transmitList)
-    );
-  }
-
-  toString(): string {
-    return new ToStringHelper(this)
-      .add("name", this.name)
-      .add("arguments", this.arguments)
-      .add("triggers", this.transmitList)
-      .toString();
   }
 }

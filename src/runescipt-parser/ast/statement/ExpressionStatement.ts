@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../runescript/util/JavaObjects';
-import { ToStringHelper } from '../../runescript/util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { NodeSourceLocation } from '../NodeSourceLocation';
@@ -25,21 +23,5 @@ export class ExpressionStatement extends Statement {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitExpressionStatement(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.expression);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof ExpressionStatement)) return false;
-        return JavaObjects.equals(this.expression, other.expression);
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("expression", this.expression)
-            .toString();
     }
 }

@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../runescript/util/JavaObjects';
-import { ToStringHelper } from '../../runescript/util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { NodeSourceLocation } from '../NodeSourceLocation';
@@ -34,25 +32,5 @@ export class WhileStatement extends Statement {
 
   accept<R>(visitor: AstVisitor<R>): R {
       return visitor.visitWhileStatement(this);
-  }
-
-  hashCode(): number {
-      return JavaObjects.hash(this.condition, this.thenStatement);
-  }
-
-  equals(other: unknown): boolean {
-      if (this === other) return true;
-      if (!(other instanceof WhileStatement)) return false;
-      return (
-        JavaObjects.equals(this.equals, other.condition) &&
-        JavaObjects.equals(this.thenStatement, other.thenStatement)
-      );
-  }
-
-  toString(): string {
-    return new ToStringHelper(this)
-        .add("condition", this.condition)
-        .add("thenStatement", this.thenStatement)
-        .toString();
   }
 }

@@ -1,5 +1,3 @@
-import { JavaObjects } from '../../runescript/util/JavaObjects';
-import { ToStringHelper } from '../../runescript/util/ToStringHelper';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { VariableExpression } from '../expr/variable/VariableExpression';
@@ -33,26 +31,5 @@ export class AssignmentStatement extends Statement {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitAssignmentStatement(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.vars, this.expressions);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof AssignmentStatement)) return false;
-
-        return (
-            JavaObjects.equals(this.vars, other.vars) &&
-            JavaObjects.equals(this.expressions, other.expressions)
-        );
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("vars", this.vars)
-            .add("expressions", this.expressions)
-            .toString();
     }
 }

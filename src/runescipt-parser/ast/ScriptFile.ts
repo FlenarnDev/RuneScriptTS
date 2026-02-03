@@ -1,6 +1,4 @@
 
-import { JavaObjects } from '../../util/JavaObjects';
-import { ToStringHelper } from '../../util/ToStringHelper';
 import { AstVisitor } from './AstVisitor';
 import { Node } from './Node';
 import { NodeSourceLocation } from './NodeSourceLocation';
@@ -23,21 +21,5 @@ export class ScriptFile extends Node {
 
     accept<R>(visitor: AstVisitor<R>): R {
         return visitor.visitScriptFile(this);
-    }
-
-    hashCode(): number {
-        return JavaObjects.hash(this.scripts);
-    }
-
-    equals(other: unknown): boolean {
-        if (this === other) return true;
-        if (!(other instanceof ScriptFile)) return false;
-        return JavaObjects.equals(this.scripts, other.scripts);
-    }
-
-    toString(): string {
-        return new ToStringHelper(this)
-            .add("scripts", this.scripts)
-            .toString();
     }
 }
