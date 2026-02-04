@@ -40,7 +40,7 @@ export abstract class SymbolLoader {
      */
     addBasic(symbolTable: SymbolTable, type: Type, name: string, isProtected: boolean = false): BasicSymbol {
         const symbol: BasicSymbol = new BasicSymbol(name, type, isProtected);
-        if (symbolTable.insert(SymbolType.basic(type), symbol)) {
+        if (!symbolTable.insert(SymbolType.basic(type), symbol)) {
             throw new Error(`Unable to add basic: type=${type}, name=${name}`)
         }
 
