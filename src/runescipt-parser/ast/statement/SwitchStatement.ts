@@ -1,3 +1,4 @@
+import { Type } from '../../../runescript-compiler/type/Type';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { NodeSourceLocation } from '../NodeSourceLocation';
@@ -22,6 +23,8 @@ export class SwitchStatement extends Statement {
     public readonly typeToken: Token;
     public readonly condition: Expression;
     public readonly cases: SwitchCase[];
+    public defaultCase: SwitchCase | null = null;
+    public type: Type;
 
     constructor(
         source: NodeSourceLocation,

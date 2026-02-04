@@ -1,3 +1,4 @@
+import { LocalVariableSymbol } from '../../../runescript-compiler/symbol/Symbol';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { Identifier } from '../expr/Identifier';
@@ -18,6 +19,7 @@ export class ArrayDeclarationStatement extends Statement {
     public readonly typeToken: Token;
     public readonly name: Identifier;
     public readonly initializer: Expression;
+    public symbol: LocalVariableSymbol;
 
     constructor(
         source: NodeSourceLocation,

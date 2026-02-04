@@ -1,5 +1,6 @@
 import { AstVisitor } from '../../AstVisitor';
 import { NodeSourceLocation } from '../../NodeSourceLocation';
+import { Expression } from '../Expression';
 import { Identifier } from '../Identifier';
 import { VariableExpression } from './VariableExpression';
 
@@ -12,6 +13,8 @@ import { VariableExpression } from './VariableExpression';
  * ```
  */
 export class ConstantVariableExpression extends VariableExpression {
+  public subExpression: Expression | null = null;
+
   constructor(source: NodeSourceLocation, name: Identifier) {
     super(source, name);
   }

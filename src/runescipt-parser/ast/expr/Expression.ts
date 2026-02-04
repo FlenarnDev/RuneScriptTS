@@ -14,22 +14,22 @@ export abstract class Expression extends Node {
     /**
      * The type inferred by the type checker. Optional until visited.
      */
-    public type?: Type;
-
-    /**
-     * Returns the type if it exists, otherwise undefined.
-     */
-    public get nullableType(): Type | undefined {
-        return this.type;
-    }
+    public type: Type | null = null;
 
     /**
      * Optional type hint for type checking.
      */
-    public typeHint?: Type
+    public typeHint: Type | null = null;
 
-    /**
-     * Optional reference to a symbol.
-     */
-    public reference?: BasicSymbol;
+    public getNullableType(): Type | null {
+        return this.type;
+    }
+
+    public getType(): Type {
+        if (this.type == null) {
+            throw new Error(`Attribute: 'type' should be initialized before get.`);
+        } else {
+            return this.type;
+        }
+    }
 }

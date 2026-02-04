@@ -9,7 +9,6 @@ import { Diagnostics } from '../../diagnostics/Diagnostics';
 import { ScriptSymbol } from '../../symbol/ScriptSymbol';
 import { SymbolTable } from '../../symbol/SymbolTable';
 import { Node } from '../../../runescipt-parser/ast/Node';
-import { getCallReference, getIdentifierReference } from '../../NodeAttributes';
 
 /**
  * Contains the context of the [CodeGenerator] and supplies useful functions when
@@ -75,8 +74,8 @@ export class CodeGeneratorContext {
          * code generation code which makes this safe, but we'll make the compiler happy. 
          */
         const symbol = (() => {
-        if (this.expression instanceof CommandCallExpression) return getCallReference(this.expression);
-        if (this.expression instanceof Identifier) return getIdentifierReference(this.expression);
+        if (this.expression instanceof CommandCallExpression) this.expression.symbol;
+        if (this.expression instanceof Identifier) return this.expression.reference;
         })() as ScriptSymbol | null;
 
         this.lineInstruction(this.expression);

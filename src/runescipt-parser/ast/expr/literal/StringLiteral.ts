@@ -1,5 +1,7 @@
+import { Symbol } from "../../../../runescript-compiler/symbol/Symbol";
 import { AstVisitor } from "../../AstVisitor";
 import { NodeSourceLocation } from "../../NodeSourceLocation";
+import { Expression } from "../Expression";
 import { Literal } from "./Literal";
 
 /**
@@ -12,6 +14,9 @@ import { Literal } from "./Literal";
  * ```
  */
 export class StringLiteral extends Literal<string> {
+  public symbol: Symbol | null = null;
+  public subExpression: Expression | null = null;
+
   constructor(source: NodeSourceLocation, value: string) {
     super(source, value);
   }

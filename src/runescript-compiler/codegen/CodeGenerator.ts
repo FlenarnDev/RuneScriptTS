@@ -40,8 +40,7 @@ import { CodeGeneratorContext } from '../configuration/command/CodeGeneratorCont
 import { DynamicCommandHandler } from '../configuration/command/DynamicCommandHandler';
 import { DiagnosticMessage } from '../diagnostics/DiagnosticMessage';
 import { Diagnostics } from '../diagnostics/Diagnostics';
-import { getCallReference, getConstantSubExpression, getDeclarationSymbol, getIdentifierReference, getParameterSymbol, getScriptReturnType, getScriptSubjectReference, getScriptSymbol, getScriptTriggerType, getStringReference, getStringSubExpression, getSwitchDefaultCase } from '../NodeAttributes';
-import { ScriptSymbol, ServerScriptSymbol } from '../symbol/ScriptSymbol';
+import { ServerScriptSymbol } from '../symbol/ScriptSymbol';
 import { BasicSymbol, LocalVariableSymbol } from '../symbol/Symbol';
 import { SymbolTable } from '../symbol/SymbolTable';
 import { CommandTrigger } from '../trigger/CommandTrigger';
@@ -162,12 +161,12 @@ export class CodeGenerator extends AstVisitor<void> {
 
     override visitScript(script: Script): void {
         // Skip commands declarations
-        if (getScriptTriggerType(script) == CommandTrigger) {
+        if (script.triggerType == CommandTrigger) {
             return;
         }
 
         // Add the script to the list of scripts in the file.
-        this._scripts.push(new RuneScript(script.source.name, getScriptSymbol(script), getScriptSubjectReference(script)));
+        this._scripts.push(new RuneScript(script.source.name, script.symbol, script.subjectReference));
 
         // Visit parameters to add them to the scripts local table.
         this.visitNodes(script.parameters);
@@ -190,7 +189,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitParameter(parameter: Parameter): void {
-        const symbol = getParameterSymbol(parameter);
+        const symbol = parameter.symbol;
 
         // Add the local variable symbol to list of parameters and all locals.
         this.script.locals.parameters.push(symbol);
@@ -204,7 +203,7 @@ export class CodeGenerator extends AstVisitor<void> {
         // Specify the line number where the script is defined for default returns.
         this.lineInstruction(script);
 
-        const types = TupleType.toList(getScriptReturnType(script));
+        const types = TupleType.toList(script.returnType);
         for (const type of types) {
             if (type == PrimitiveType.INT) {
                 this.instruction(Opcode.PushConstantInt, 0);
@@ -322,7 +321,7 @@ export class CodeGenerator extends AstVisitor<void> {
 
     override visitSwitchStatement(switchStatement: SwitchStatement): void {
         const table = this.script.generateSwitchTable();
-        const hasDefault = getSwitchDefaultCase(switchStatement) != null;
+        const hasDefault = switchStatement.defaultCase != null;
         const switchDefault = hasDefault
             ? this.labelGenerator.generate("switch_default_case")
             : null;
@@ -380,8 +379,8 @@ export class CodeGenerator extends AstVisitor<void> {
      */
     private resolveConstantValue(expression: Expression): any |null {
         if (expression instanceof ConstantVariableExpression) {
-            return getConstantSubExpression(expression)
-                ? this.resolveConstantValue(getConstantSubExpression(expression))
+            return expression.subExpression
+                ? this.resolveConstantValue(expression.subExpression)
                 : null;
         }
 
@@ -390,7 +389,7 @@ export class CodeGenerator extends AstVisitor<void> {
         }
 
         if (expression instanceof StringLiteral) {
-            return expression.reference ?? expression.value;
+            return expression.symbol ?? expression.value;
         }
 
         if (expression instanceof Literal) {
@@ -401,7 +400,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitDeclarationStatement(declarationStatement: DeclarationStatement): void {
-        const symbol = getDeclarationSymbol(declarationStatement);
+        const symbol = declarationStatement.symbol;
 
         // Add the variable to the scripts local table.
         this.script.locals.all.push(symbol);
@@ -430,7 +429,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitArrayDeclarationStatement(arrayDeclarationStatement: ArrayDeclarationStatement): void {
-        const symbol = getDeclarationSymbol(arrayDeclarationStatement);
+        const symbol = arrayDeclarationStatement.symbol;
 
         // Add the variable to the scripts local table.
         this.script.locals.all.push(symbol);
@@ -532,7 +531,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitConstantVariableExpression(constantVariableExpression: ConstantVariableExpression): void {
-        const subExpression = getConstantSubExpression(constantVariableExpression);
+        const subExpression = constantVariableExpression.subExpression;
         if (subExpression == null) {
             reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.EXPRESSION_NO_SUBEXPR);
             return;
@@ -581,7 +580,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitCommandCallExpression(commandCallExpression: CommandCallExpression): void {
-        const symbol = getCallReference(commandCallExpression) as ScriptSymbol | null;
+        const symbol = commandCallExpression.symbol;
         if (symbol == null) {
             reportError(this.diagnostics, commandCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
@@ -608,7 +607,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitProcCallExpression(procCallExpression: ProcCallExpression): void {
-        const symbol = getCallReference(procCallExpression) as ScriptSymbol | null;
+        const symbol = procCallExpression.symbol;
         if (symbol == null) {
             reportError(this.diagnostics, procCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
@@ -620,7 +619,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitJumpCallExpression(jumpCallExpression: JumpCallExpression): void {
-        const symbol = getCallReference(jumpCallExpression) as ScriptSymbol | null;
+        const symbol = jumpCallExpression.symbol;
         if (symbol == null) {
             reportError(this.diagnostics, jumpCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
@@ -632,7 +631,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitClientScriptExpression(clientScriptExpression: ClientScriptExpression): void {
-        const symbol = getCallReference(clientScriptExpression) as ServerScriptSymbol | null;
+        const symbol = clientScriptExpression.symbol as ServerScriptSymbol | null;
         if (symbol == null) {
             reportError(this.diagnostics, clientScriptExpression, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
@@ -700,7 +699,7 @@ export class CodeGenerator extends AstVisitor<void> {
 
         this.instruction(Opcode.PushConstantInt, 1, nullLiteral.source);
 
-        if (nullLiteral.type instanceof MetaType.Hook) {
+        if (nullLiteral.getType() instanceof MetaType.Hook) {
             /**
              * TODO: Figure out better way to handle this.
              * Hack to make null clientscript references work properly.
@@ -713,14 +712,14 @@ export class CodeGenerator extends AstVisitor<void> {
         this.lineInstruction(stringLiteral);
 
         // Visit the sub-expression if one exists.
-        const subExpression = getStringSubExpression(stringLiteral);
+        const subExpression = stringLiteral.subExpression;
         if (subExpression != null) {
             this.visitNodeOrNull(subExpression);
             return;
         }
 
         // Push the reference if one exists.
-        const reference = getStringReference(stringLiteral);
+        const reference = stringLiteral.symbol;
         if (reference != null) {
             this.instruction(Opcode.PushConstantSymbol, reference, stringLiteral.source);
             return;
@@ -751,7 +750,7 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     override visitIdentifier(identifier: Identifier): void {
-        const reference = getIdentifierReference(identifier);
+        const reference = identifier.reference;
         if (reference == null) {
             reportError(this.diagnostics, identifier, DiagnosticMessage.SYMBOL_IS_NULL);
             return;

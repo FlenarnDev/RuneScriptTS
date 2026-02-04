@@ -30,7 +30,6 @@ import { ScriptParser } from '../../runescipt-parser/parser/ScriptParser';
 import { CharStreams } from 'antlr4ts';
 import { RuneScriptParser } from '../../antlr/out/RuneScriptParser';
 import { ClientScriptExpression } from '../../runescipt-parser/ast/expr/ClientScriptExpression';
-import { getBlockScope, getScriptReturnType, getScriptScope, getScriptTriggerType, getStringSubExpression, getSwitchCaseScope, getSwitchType, setCallReference, setConstantSubExpression, setDeclarationSymbol, setIdentifierReference, setStringReference, setStringSubExpression, setSwitchDefaultCase, setVariableReference } from '../NodeAttributes';
 import { NullLiteral } from '../../runescipt-parser/ast/expr/literal/NullLiteral';
 import { CharacterLiteral } from '../../runescipt-parser/ast/expr/literal/CharacterLiteral';
 import { BooleanLiteral } from '../../runescipt-parser/ast/expr/literal/BooleanLiteral';
@@ -137,7 +136,7 @@ export class TypeChecking extends AstVisitor<void> {
     }
 
     override visitScript(script: Script): void {
-        this.scoped(getScriptScope(script), () => {
+        this.scoped(script.block, () => {
             /**
              * Visit all statements, we don't need to do anything else with the
              * script since all the other stuff is handled in pre-type checking.
@@ -147,7 +146,7 @@ export class TypeChecking extends AstVisitor<void> {
     }
 
     override visitBlockStatement(blockStatement: BlockStatement): void {
-        this.scoped(getBlockScope(blockStatement), () => {
+        this.scoped(blockStatement.scope, () => {
             // Visit all statements.
             this.visitNodes(blockStatement.statements);
         })
@@ -164,7 +163,7 @@ export class TypeChecking extends AstVisitor<void> {
             return;
         }
         // Use the return types from the script node and get the types being returned.
-        const expectedTypes = TupleType.toList(getScriptReturnType(script));
+        const expectedTypes = TupleType.toList(script.returnType);
         const actualTypes = this.typeHintExpressionList(expectedTypes, returnStatement.expressions);
 
         // Convert the types into a single type.
@@ -239,7 +238,7 @@ export class TypeChecking extends AstVisitor<void> {
     }
 
     override visitSwitchStatement(switchStatement: SwitchStatement): void {
-        const expectedType = getSwitchType(switchStatement);
+        const expectedType = switchStatement.type;
 
         // Type hint the condition and visit it.
         const condition = switchStatement.condition;
@@ -262,11 +261,11 @@ export class TypeChecking extends AstVisitor<void> {
             }
             this.visitNodeOrNull(caseEntry);
         }
-        setSwitchDefaultCase(switchStatement, defaultCase);
+        switchStatement.defaultCase = defaultCase;
     }
 
     override visitSwitchCase(switchCase: SwitchCase): void {
-        const switchType = getSwitchType(switchCase.findParentByType(SwitchStatement));
+        const switchType = switchCase.findParentByType(SwitchStatement).type;
         if (switchType == null) {
             // The parent should always be a switch statemtn, if not we're in trouble...
             reportError(this.diagnostics, switchCase, DiagnosticMessage.CASE_WITHOUT_SWITCH);
@@ -288,7 +287,7 @@ export class TypeChecking extends AstVisitor<void> {
             this.checkTypeMatch(key, switchType, key.type);
         }
 
-        this.scoped(getSwitchCaseScope(switchCase), () => {
+        this.scoped(switchCase.scope, () => {
             // Visit the statements.
             this.visitNodes(switchCase.statements)
         });
@@ -307,7 +306,7 @@ export class TypeChecking extends AstVisitor<void> {
              * We need to special case this since it's possible for a string literal to have been
              * transformed intoa another expression tpye (e.g graphic or clientscript).
              */
-            const sub = getStringSubExpression(expression);
+            const sub = expression.subExpression;
             return sub == null || this.isConstantExpression(sub);
         }
 
@@ -359,7 +358,7 @@ export class TypeChecking extends AstVisitor<void> {
             this.checkTypeMatch(initializer, symbol.type, initializer.type);
         }
 
-        setDeclarationSymbol(declarationStatement, symbol);
+        declarationStatement.symbol = symbol;
     }
 
     override visitArrayDeclarationStatement(arrayDeclarationStatement: ArrayDeclarationStatement): void {
@@ -392,7 +391,7 @@ export class TypeChecking extends AstVisitor<void> {
             reportError(this.diagnostics, arrayDeclarationStatement.name, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
-        setDeclarationSymbol(arrayDeclarationStatement, symbol);
+        arrayDeclarationStatement.symbol = symbol;
     }
 
     override visitAssignmentStatement(assignmentStatement: AssignmentStatement): void {
@@ -487,8 +486,8 @@ export class TypeChecking extends AstVisitor<void> {
             right.typeHint = allowedTypes[0];
         } else {
             // Assign the type hints using the opposite side if it isn't already assigned.
-            left.typeHint = left.typeHint ?? right.nullableType;
-            right.typeHint = right.typeHint ?? left.nullableType;
+            left.typeHint = left.typeHint ?? right.getNullableType();
+            right.typeHint = right.typeHint ?? left.getNullableType();
         }
 
         /**
@@ -502,15 +501,15 @@ export class TypeChecking extends AstVisitor<void> {
         this.visitNodeOrNull(right);
 
         // Verify the left and right type only return 1 type that is not 'unit'.
-        if (left.type instanceof TupleType || right.type instanceof TupleType) {
-            if (left.type instanceof TupleType) {
+        if (left.getType() instanceof TupleType || right.getType() instanceof TupleType) {
+            if (left.getType() instanceof TupleType) {
                 reportError(this.diagnostics, left, DiagnosticMessage.BINOP_TUPLE_TYPE, "Left", left.type.representation);
             }
-            if (right.type instanceof TupleType) {
+            if (right.getType() instanceof TupleType) {
                 reportError(this.diagnostics, right, DiagnosticMessage.BINOP_TUPLE_TYPE, "Right", right.type.representation);
             }
             return false;
-        } else if (left.type == MetaType.Unit || right.type == MetaType.Unit) {
+        } else if (left.getType() == MetaType.Unit || right.getType() == MetaType.Unit) {
             reportError(
                 this.diagnostics,
                 operator,
@@ -524,18 +523,18 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Handle operator specific required types, this applies toa ll except '!' and '='.
         if (allowedTypes != null) {
-            if (!this.checkTypeMatchAny(left, allowedTypes, left.type) || !this.checkTypeMatchAny(right, allowedTypes, right.type)) {
-                reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
+            if (!this.checkTypeMatchAny(left, allowedTypes, left.getType()) || !this.checkTypeMatchAny(right, allowedTypes, right.getType())) {
+                reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
                 return false;
             }
         }
 
         // Handle equality operator, which allows any type on either side as long as they match.
-        if (!this.checkTypeMatch(left, left.type, right.type, false)) {
-            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
+        if (!this.checkTypeMatch(left, left.getType(), right.getType(), false)) {
+            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
             return false;
-        } else if (left.type == PrimitiveType.STRING && right.type == PrimitiveType.STRING) {
-            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
+        } else if (left.getType() == PrimitiveType.STRING && right.getType() == PrimitiveType.STRING) {
+            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
             return false;
         }
         
@@ -612,7 +611,7 @@ export class TypeChecking extends AstVisitor<void> {
         const currentScript = jumpCallExpression.findParentByType(Script);
         if (!currentScript) throw new Error("Parent script not found.");
 
-        if (getScriptTriggerType(currentScript) === this.procTrigger) {
+        if (currentScript.triggerType === this.procTrigger) {
             reportError(this.diagnostics, jumpCallExpression, "Unable to jump to labels from within a proc.");
             return;
         }
@@ -634,14 +633,14 @@ export class TypeChecking extends AstVisitor<void> {
             dynamicCommand.typeCheck(context);
 
             // Verify tye type has been set.
-            if (!expression.nullableType) {
+            if (!expression.getNullableType()) {
                 reportError(this.diagnostics, expression, DiagnosticMessage.CUSTOM_HANDLER_NOTYPE);
             }
 
             // If the symbol was not manually specified, attempt to look up a predefined one.
             const needsSymbol = 
                 (expression instanceof Identifier && !expression.reference) ||
-                (expression instanceof CallExpression && !expression.reference);
+                (expression instanceof CallExpression && !expression.symbol);
 
             if (needsSymbol) {
                 const symbol = this.rootTable.find(SymbolType.serverScript(this.commandTrigger), name);
@@ -650,9 +649,9 @@ export class TypeChecking extends AstVisitor<void> {
                 }
 
                 if (expression instanceof Identifier) {
-                    setIdentifierReference(expression, symbol);
+                    expression.reference = symbol;
                 } else if (expression instanceof CallExpression) {
-                    setCallReference(expression, symbol);
+                    expression.symbol = symbol;
                 }
             }
         })();
@@ -672,7 +671,7 @@ export class TypeChecking extends AstVisitor<void> {
             call.type = MetaType.Error;
             reportError(this.diagnostics, call, unresolvedSymbolMessage, name);
         } else {
-            setCallReference(call, symbol);
+            call.symbol = symbol;
             call.type = symbol.returns;
         }
 
@@ -701,7 +700,7 @@ export class TypeChecking extends AstVisitor<void> {
             reportError(this.diagnostics, clientScriptExpression, DiagnosticMessage.CLIENTSCRIPT_REFERENCE_UNRESOLVED, name);
             clientScriptExpression.type = MetaType.Error;
         } else {
-            setCallReference(clientScriptExpression, symbol);
+            clientScriptExpression.symbol = symbol;
             clientScriptExpression.type = typeHint;
         }
 
@@ -806,7 +805,7 @@ export class TypeChecking extends AstVisitor<void> {
             this.checkTypeMatch(indexExpression, PrimitiveType.INT, indexExpression.type);
         }
 
-        setVariableReference(localVariableExpression, symbol);
+        localVariableExpression.reference = symbol;
         localVariableExpression.type = symbol.type instanceof ArrayType ? symbol.type.inner : symbol.type;
     }
 
@@ -909,7 +908,7 @@ export class TypeChecking extends AstVisitor<void> {
             }
 
             // Set the sub-expresssion to the parser expression and the type to the parsed expressions type.
-            setConstantSubExpression(constantVariableExpression, parsedExpression);
+            constantVariableExpression.subExpression = parsedExpression;
             constantVariableExpression.type = parsedExpression.type;
         } finally {
             // Remove the symbol from the set since it is no longer being evaluated.
@@ -964,7 +963,7 @@ export class TypeChecking extends AstVisitor<void> {
         } else if(hint instanceof MetaType.Hook) {
             this.handleClientScriptExpression(stringLiteral, hint);
         } else if (!TypeChecking.LITERAL_TYPES.has(hint)) {
-            setStringReference(stringLiteral, this.resolveSymbol(stringLiteral, stringLiteral.value, hint) )
+            stringLiteral.symbol = this.resolveSymbol(stringLiteral, stringLiteral.value, hint);
         } else {
             stringLiteral.type = PrimitiveType.STRING
         }
@@ -1001,7 +1000,7 @@ export class TypeChecking extends AstVisitor<void> {
         this.visitNodeOrNull(clientScriptExpression);
 
         // Copy the type from the parsed expression.
-        setStringSubExpression(stringLiteral, clientScriptExpression);
+        stringLiteral.subExpression = clientScriptExpression;
         stringLiteral.type = clientScriptExpression.type;
     }
 

@@ -1,4 +1,9 @@
 
+import { ScriptSymbol } from '../../runescript-compiler/symbol/ScriptSymbol';
+import { BasicSymbol } from '../../runescript-compiler/symbol/Symbol';
+import { SymbolTable } from '../../runescript-compiler/symbol/SymbolTable';
+import { TriggerType } from '../../runescript-compiler/trigger/TriggerType';
+import { Type } from '../../runescript-compiler/type/Type';
 import { AstVisitor } from './AstVisitor';
 import { Identifier } from './expr/Identifier';
 import { Node } from './Node';
@@ -29,6 +34,12 @@ export class Script extends Node {
     public readonly parameters?: Parameter[];
     public readonly returnTokens?: Token[];
     public readonly statements: Statement[];
+    public block: SymbolTable;
+    public symbol: ScriptSymbol;
+    public returnType: Type;
+    public triggerType: TriggerType;
+    public subjectReference: BasicSymbol | null = null;
+    public parameterType: Type;
 
     constructor(
         source: NodeSourceLocation,

@@ -1,6 +1,7 @@
 import { AstVisitor } from "../AstVisitor";
 import { NodeSourceLocation } from "../NodeSourceLocation";
 import { Expression } from "./Expression";
+import { Symbol } from "../../../runescript-compiler/symbol/Symbol";
 
 /**
  * Represent some kind of identifier within code.
@@ -9,6 +10,7 @@ import { Expression } from "./Expression";
  */
 export class Identifier extends Expression {
     public readonly text: string;
+    public reference: Symbol | null = null;
 
     constructor(source: NodeSourceLocation, text: string) {
         super(source);

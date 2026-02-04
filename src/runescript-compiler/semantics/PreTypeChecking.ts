@@ -8,7 +8,6 @@ import { SwitchCase } from '../../runescipt-parser/ast/statement/SwitchCase';
 import { SwitchStatement } from '../../runescipt-parser/ast/statement/SwitchStatement';
 import { DiagnosticMessage } from '../diagnostics/DiagnosticMessage';
 import { Diagnostics } from '../diagnostics/Diagnostics';
-import { getParameterSymbol, getScriptParameterType, getScriptReturnType, setBlockScope, setParameterSymbol, setScriptParameterType, setScriptReturnType, setScriptScope, setScriptSubjectReference, setScriptSymbol, setScriptTriggerType, setSwitchCaseScope, setSwitchType } from '../NodeAttributes';
 import { ServerScriptSymbol } from '../symbol/ScriptSymbol';
 import { BasicSymbol, LocalVariableSymbol } from '../symbol/Symbol';
 import { SymbolTable } from '../symbol/SymbolTable';
@@ -94,7 +93,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         if (!trigger) {
             reportError(this.diagnostics, script.trigger, DiagnosticMessage.SCRIPT_TRIGGER_INVALID, script.trigger.text);
         } else {
-            setScriptTriggerType(script, trigger);
+            script.triggerType = trigger;
         }
 
         if (script.isStar && trigger !== CommandTrigger) {
@@ -114,7 +113,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         parameters?.forEach(param => param.accept(this));
 
         // Specify the parameter types for easy lookup later.
-        setScriptParameterType(script, TupleType.fromList(parameters?.map(p => getParameterSymbol(p).type) ?? []));
+        script.parameterType = TupleType.fromList(parameters?.map(p => p.symbol.type) ?? []);
 
         // Verify parameters match what the trigger type allows.
         this.checkScriptParameters(trigger, script, parameters);
@@ -130,15 +129,14 @@ export class PreTypeChecking extends AstVisitor<void> {
                 }
                 returns.push(type ?? MetaType.Error);
             }
-            setScriptReturnType(script, TupleType.fromList(returns));
+            script.returnType = TupleType.fromList(returns);
         } else {
             // Default return based on trigger
-            setScriptReturnType(script, !trigger
+            script.returnType = !trigger
                 ? MetaType.Error
                 : trigger.allowReturns
                 ? MetaType.Unit
-                : MetaType.Nothing
-            )
+                : MetaType.Nothing;
         }
 
         // Verify returns match what the trigger type allows
@@ -146,14 +144,14 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         if (trigger) {
             // Attempt to insert the script into the root table and error if failed.
-            const scriptSymbol = new ServerScriptSymbol(trigger, script.nameString, getScriptParameterType(script), getScriptReturnType(script));
+            const scriptSymbol = new ServerScriptSymbol(trigger, script.nameString, script.parameterType, script.returnType);
 
             const inserted = this.rootTable.insert(SymbolType.serverScript(trigger), scriptSymbol);
             if (!inserted) {
                 reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_REDECLARATION, trigger.identifier, script.nameString);
             } else {
                 // Only set the symbol if it was actually inserted
-                setScriptSymbol(script, scriptSymbol);
+                script.symbol = scriptSymbol;
             }
         }
 
@@ -161,7 +159,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         script.statements.forEach(stmt => stmt.accept(this));
 
         // Set the root symbol table for the script
-        setScriptScope(script, this.table);
+        script.block = this.table;
     }
 
     /**
@@ -339,13 +337,13 @@ export class PreTypeChecking extends AstVisitor<void> {
     private resolveSubjectSymbol(script: Script, subject: string, type: Type): void {
         if (type === PrimitiveType.MAPZONE) {
             const packed = this.tryParseMapZone(script, subject);
-            setScriptSubjectReference(script, new BasicSymbol(packed.toString(), type, false));
+            script.subjectReference = new BasicSymbol(packed.toString(), type, false);
             return;
         }
 
         if (type === PrimitiveType.COORD) {
             const packed = this.tryParseZone(script, subject);
-            setScriptSubjectReference(script, new BasicSymbol(packed.toString(), type, false));
+            script.subjectReference = new BasicSymbol(packed.toString(), type, false);
             return;
         }
 
@@ -360,7 +358,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             return;
         }
 
-        setScriptSubjectReference(script, symbol as BasicSymbol);
+        script.subjectReference = symbol as BasicSymbol;
     }
 
     /**
@@ -368,7 +366,7 @@ export class PreTypeChecking extends AstVisitor<void> {
      */
     private checkScriptParameters(trigger: TriggerType | null, script: Script, parameters: Parameter[] | null): void {
         const triggerParameterType = trigger?.parameters;
-        const scriptParameterType = getScriptParameterType(script);
+        const scriptParameterType = script.parameterType;
 
         if (trigger && !trigger.allowParameters && parameters && parameters.length > 0) {
             reportError(this.diagnostics, parameters[0], DiagnosticMessage.SCRIPT_TRIGGER_NO_PARAMETERS, trigger.identifier);
@@ -383,7 +381,7 @@ export class PreTypeChecking extends AstVisitor<void> {
      */
     private checkScriptReturns(trigger: TriggerType | null, script: Script): void {
         const triggerReturns = trigger?.returns;
-        const scriptReturns = getScriptReturnType(script);
+        const scriptReturns = script.returnType;
 
         if (trigger && !trigger.allowReturns && scriptReturns !== MetaType.Nothing) {
             reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
@@ -417,7 +415,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             reportError(this.diagnostics, parameter, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
-        setParameterSymbol(parameter, symbol);
+        parameter.symbol = symbol;
     }
 
     override visitBlockStatement(blockStatement: BlockStatement): void {
@@ -426,7 +424,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             this.visit(blockStatement.statements);
 
             // Set the symbol table for the block.
-            setBlockScope(blockStatement, this.table);
+            blockStatement.scope = this.table;
         });
     }
 
@@ -448,7 +446,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         this.visit(switchStatement.cases);
 
         // Set the expected tyep of the switch case.
-        setSwitchType(switchStatement, type ?? MetaType.Error);
+        switchStatement.type = type ?? MetaType.Error;
     }
 
     override visitSwitchCase(switchCase: SwitchCase): void {
@@ -460,7 +458,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             this.visit(switchCase.statements);
 
             // Set the symbol table for the block
-            setSwitchCaseScope(switchCase, this.table);
+            switchCase.scope = this.table;
         });
         
     }

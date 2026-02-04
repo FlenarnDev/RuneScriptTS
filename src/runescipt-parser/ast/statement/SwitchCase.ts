@@ -1,3 +1,4 @@
+import { SymbolTable } from '../../../runescript-compiler/symbol/SymbolTable';
 import { AstVisitor } from '../AstVisitor';
 import { Expression } from '../expr/Expression';
 import { Node } from '../Node';
@@ -13,6 +14,7 @@ import { Statement } from './Statement';
 export class SwitchCase extends Node {
     public readonly keys: Expression[];
     public readonly statements: Statement[];
+    public scope: SymbolTable;
 
     constructor(
         source: NodeSourceLocation,

@@ -3,6 +3,7 @@ import { Identifier } from './expr/Identifier';
 import { NodeSourceLocation } from './NodeSourceLocation';
 import { Token } from './Token';
 import { AstVisitor } from './AstVisitor';
+import { LocalVariableSymbol } from '../../runescript-compiler/symbol/Symbol';
 
 /**
  * Represent a single parameter in a [Script].
@@ -15,6 +16,7 @@ import { AstVisitor } from './AstVisitor';
 export class Parameter extends Node {
     public readonly typeToken: Token;
     public readonly name: Identifier;
+    public symbol: LocalVariableSymbol;
 
     constructor(source: NodeSourceLocation, typeToken: Token, name: Identifier) {
         super(source);
