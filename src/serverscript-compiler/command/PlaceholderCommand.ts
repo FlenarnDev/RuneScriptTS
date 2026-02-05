@@ -15,9 +15,9 @@ export class PlaceholderCommand implements DynamicCommandHandler {
         context.checkArgumentTypes(MetaType.Unit);
         context.expression.type = this.type;
     }
+
     generateCode?(context: CodeGeneratorContext): void {
         context.lineInstruction(context.expression);
-        
 
         if (typeof this.value === 'number') {
             context.instruction(Opcode.PushConstantInt, this.value);
