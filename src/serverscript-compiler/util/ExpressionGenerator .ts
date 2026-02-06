@@ -14,7 +14,7 @@ import { GameVariableExpression } from "../../runescipt-parser/ast/expr/variable
 import { LocalVariableExpression } from "../../runescipt-parser/ast/expr/variable/LocalVariableExpression";
 import { Node } from "../../runescipt-parser/ast/Node";
 
-export class CodeGenerator extends AstVisitor<string> {
+export class ExpressionGenerator extends AstVisitor<string> {
     override visitBinaryExpression(expr: BinaryExpression): string {
         return `${this.visit(expr.left)} ${expr.operator.text} ${this.visit(expr.right)}`;
     }
