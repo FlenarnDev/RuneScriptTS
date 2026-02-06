@@ -63,7 +63,6 @@ import { WhileStatement } from '../../runescipt-parser/ast/statement/WhileStatem
 import { IfStatement } from '../../runescipt-parser/ast/statement/IfStatement';
 import { ReturnStatement } from '../../runescipt-parser/ast/statement/ReturnStatement';
 import { BlockStatement } from '../../runescipt-parser/ast/statement/BlockStatement';
-import { reportError, reportInfo } from '../diagnostics/DiagnosticHelpers';
 
 /**
  * An implementation of [AstVisitor] that implements all remaining semantic/type
@@ -159,7 +158,7 @@ export class TypeChecking extends AstVisitor<void> {
              * A return statement should always be within a script,
              * if not then we have problems!
              */
-            reportError(this.diagnostics, returnStatement, DiagnosticMessage.RETURN_ORPHAN);
+            returnStatement.reportError(this.diagnostics, DiagnosticMessage.RETURN_ORPHAN);
             return;
         }
         // Use the return types from the script node and get the types being returned.
@@ -205,7 +204,7 @@ export class TypeChecking extends AstVisitor<void> {
             this.checkTypeMatch(expression, PrimitiveType.BOOLEAN, expression.type);
         } else {
             // Report invalid condition expression on the erroneous node.
-            reportError(this.diagnostics, invalidExpression, DiagnosticMessage.CONDITION_INVALID_NODE_TYPE);
+            invalidExpression.reportError(this.diagnostics, DiagnosticMessage.CONDITION_INVALID_NODE_TYPE);
         }
     }
 
@@ -256,7 +255,7 @@ export class TypeChecking extends AstVisitor<void> {
                 if (defaultCase == null) {
                     defaultCase = caseEntry;
                 } else {
-                    reportError(this.diagnostics, caseEntry, DiagnosticMessage.SWITCH_DUPLICATE_DEFAULT);
+                    caseEntry.reportError(this.diagnostics, DiagnosticMessage.SWITCH_DUPLICATE_DEFAULT);
                 }
             }
             this.visitNodeOrNull(caseEntry);
@@ -268,7 +267,7 @@ export class TypeChecking extends AstVisitor<void> {
         const switchType = switchCase.findParentByType(SwitchStatement).type;
         if (switchType == null) {
             // The parent should always be a switch statemtn, if not we're in trouble...
-            reportError(this.diagnostics, switchCase, DiagnosticMessage.CASE_WITHOUT_SWITCH);
+            switchCase.reportError(this.diagnostics, DiagnosticMessage.CASE_WITHOUT_SWITCH);
             return;
         }
 
@@ -279,7 +278,7 @@ export class TypeChecking extends AstVisitor<void> {
             this.visitNodeOrNull(key);
 
             if (!this.isConstantExpression(key)) {
-                reportError(this.diagnostics, key, DiagnosticMessage.SWITCH_CASE_NOT_CONSTANT);
+                key.reportError(this.diagnostics, DiagnosticMessage.SWITCH_CASE_NOT_CONSTANT);
                 continue;
             }
 
@@ -336,16 +335,16 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Notify invalid type.
         if (!type) {
-            reportError(this.diagnostics, declarationStatement.typeToken, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
+            declarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
         } else if(!type.options.allowDeclaration) {
-            reportError(this.diagnostics, declarationStatement.typeToken, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
+            declarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
         }
 
         // Attempt to insert the local variable into the symbol table and display error if failed to insert.
         const symbol = new LocalVariableSymbol(name, type ?? MetaType.Error);
         const inserted = this.table.insert(SymbolType.localVariable(), symbol);
         if (!inserted) {
-            reportError(this.diagnostics, declarationStatement.name, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
+            declarationStatement.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
         // Visit the initializer if it exists to resolve references in it.
@@ -368,11 +367,11 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Notify invalid type.
         if (!type) {
-            reportError(this.diagnostics, arrayDeclarationStatement.typeToken, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
+            arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
         } else if (!type.options.allowDeclaration) {
-            reportError(this.diagnostics, arrayDeclarationStatement.typeToken, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
+            arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
         } else if (!type.options.allowArray) {
-            reportError(this.diagnostics, arrayDeclarationStatement.typeToken, DiagnosticMessage.LOCAL_ARRAY_INVALID_TYPE, type.representation);
+            arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_ARRAY_INVALID_TYPE, type.representation);
         }
 
         // Convert type into an array of type if type exists, otherwise give it error type.
@@ -388,7 +387,7 @@ export class TypeChecking extends AstVisitor<void> {
         const symbol = new LocalVariableSymbol(name, type);
         const inserted = this.table.insert(SymbolType.localVariable(), new LocalVariableSymbol(name, type));
         if (!inserted) {
-            reportError(this.diagnostics, arrayDeclarationStatement.name, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
+            arrayDeclarationStatement.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
         arrayDeclarationStatement.symbol = symbol;
@@ -413,7 +412,7 @@ export class TypeChecking extends AstVisitor<void> {
         // Prevent multi-assignment involving arrays.
         const firstArrayReference = vars.find(v => v instanceof LocalVariableExpression && v.isArray);
         if (vars.length > 1 && firstArrayReference) {
-            reportError(this.diagnostics, firstArrayReference, DiagnosticMessage.ASSIGN_MULTI_ARRAY);
+            firstArrayReference.reportError(this.diagnostics, DiagnosticMessage.ASSIGN_MULTI_ARRAY);
         }
     }
 
@@ -503,38 +502,31 @@ export class TypeChecking extends AstVisitor<void> {
         // Verify the left and right type only return 1 type that is not 'unit'.
         if (left.getType() instanceof TupleType || right.getType() instanceof TupleType) {
             if (left.getType() instanceof TupleType) {
-                reportError(this.diagnostics, left, DiagnosticMessage.BINOP_TUPLE_TYPE, "Left", left.type.representation);
+                left.reportError(this.diagnostics, DiagnosticMessage.BINOP_TUPLE_TYPE, "Left", left.type.representation);
             }
             if (right.getType() instanceof TupleType) {
-                reportError(this.diagnostics, right, DiagnosticMessage.BINOP_TUPLE_TYPE, "Right", right.type.representation);
+                right.reportError(this.diagnostics, DiagnosticMessage.BINOP_TUPLE_TYPE, "Right", right.type.representation);
             }
             return false;
         } else if (left.getType() == MetaType.Unit || right.getType() == MetaType.Unit) {
-            reportError(
-                this.diagnostics,
-                operator,
-                DiagnosticMessage.BINOP_INVALID_TYPES,
-                operator.text,
-                left.type.representation,
-                right.type.representation
-            );
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
             return false;
         }
 
         // Handle operator specific required types, this applies toa ll except '!' and '='.
         if (allowedTypes != null) {
             if (!this.checkTypeMatchAny(left, allowedTypes, left.getType()) || !this.checkTypeMatchAny(right, allowedTypes, right.getType())) {
-                reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+                operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
                 return false;
             }
         }
 
         // Handle equality operator, which allows any type on either side as long as they match.
         if (!this.checkTypeMatch(left, left.getType(), right.getType(), false)) {
-            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
             return false;
         } else if (left.getType() == PrimitiveType.STRING && right.getType() == PrimitiveType.STRING) {
-            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
             return false;
         }
         
@@ -565,7 +557,7 @@ export class TypeChecking extends AstVisitor<void> {
             !this.checkTypeMatch(left, expectedType, left.type, false) ||
             !this.checkTypeMatch(right, expectedType, right.type, false)
         ) {
-            reportError(this.diagnostics, operator, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
             arithmeticExpression.type = MetaType.Error;
             return;
         }
@@ -583,7 +575,7 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Verify type is an 'int'.
         if (!this.checkTypeMatchAny(innerExpression, TypeChecking.ALLOWED_ARITHMETIC_TYPES, innerExpression.type)) {
-            reportError(this.diagnostics, innerExpression, DiagnosticMessage.ARITHMETIC_INVALID_TYPE, innerExpression.type.representation);
+            innerExpression.reportError(this.diagnostics, DiagnosticMessage.ARITHMETIC_INVALID_TYPE, innerExpression.type.representation);
             calcExpression.type = MetaType.Error;
         } else {
             calcExpression.type = innerExpression.type;
@@ -604,7 +596,7 @@ export class TypeChecking extends AstVisitor<void> {
 
     override visitJumpCallExpression(jumpCallExpression: JumpCallExpression): void {
         if (!this.labelTrigger) {
-            reportError(this.diagnostics, jumpCallExpression, "Jump expression not allowed.");
+            jumpCallExpression.reportError(this.diagnostics, "Jump expression not allowed.");
             return;
         }
 
@@ -612,7 +604,7 @@ export class TypeChecking extends AstVisitor<void> {
         if (!currentScript) throw new Error("Parent script not found.");
 
         if (currentScript.triggerType === this.procTrigger) {
-            reportError(this.diagnostics, jumpCallExpression, "Unable to jump to labels from within a proc.");
+            jumpCallExpression.reportError(this.diagnostics, "Unable to jump to labels from within a proc.");
             return;
         }
 
@@ -634,7 +626,7 @@ export class TypeChecking extends AstVisitor<void> {
 
             // Verify tye type has been set.
             if (!expression.getNullableType()) {
-                reportError(this.diagnostics, expression, DiagnosticMessage.CUSTOM_HANDLER_NOTYPE);
+                expression.reportError(this.diagnostics, DiagnosticMessage.CUSTOM_HANDLER_NOTYPE);
             }
 
             // If the symbol was not manually specified, attempt to look up a predefined one.
@@ -645,7 +637,7 @@ export class TypeChecking extends AstVisitor<void> {
             if (needsSymbol) {
                 const symbol = this.rootTable.find(SymbolType.serverScript(this.commandTrigger), name);
                 if (!symbol) {
-                    reportError(this.diagnostics, expression, DiagnosticMessage.CUSTOM_HANDLER_NOSYMBOL);
+                    expression.reportError(this.diagnostics, DiagnosticMessage.CUSTOM_HANDLER_NOSYMBOL);
                 }
 
                 if (expression instanceof Identifier) {
@@ -669,7 +661,7 @@ export class TypeChecking extends AstVisitor<void> {
         const symbol = this.rootTable.find(symbolType, name) as ScriptSymbol | null;
         if (!symbol) {
             call.type = MetaType.Error;
-            reportError(this.diagnostics, call, unresolvedSymbolMessage, name);
+            call.reportError(this.diagnostics, unresolvedSymbolMessage, name);
         } else {
             call.symbol = symbol;
             call.type = symbol.returns;
@@ -681,7 +673,7 @@ export class TypeChecking extends AstVisitor<void> {
 
     override visitClientScriptExpression(clientScriptExpression: ClientScriptExpression): void {
         if (!this.clientscriptTrigger) {
-            reportError(this.diagnostics, clientScriptExpression, DiagnosticMessage.TRIGGER_TYPE_NOT_FOUND, "clientscript");
+            clientScriptExpression.reportError(this.diagnostics, DiagnosticMessage.TRIGGER_TYPE_NOT_FOUND, "clientscript");
             return;
         }
 
@@ -697,7 +689,7 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Verify the clientscript exists.
         if (!symbol) {
-            reportError(this.diagnostics, clientScriptExpression, DiagnosticMessage.CLIENTSCRIPT_REFERENCE_UNRESOLVED, name);
+            clientScriptExpression.reportError(this.diagnostics, DiagnosticMessage.CLIENTSCRIPT_REFERENCE_UNRESOLVED, name);
             clientScriptExpression.type = MetaType.Error;
         } else {
             clientScriptExpression.symbol = symbol;
@@ -710,7 +702,7 @@ export class TypeChecking extends AstVisitor<void> {
         // Disallow transmit list when not expected.
         const transmitListType = typeHint.transmitListType;
         if (transmitListType == MetaType.Unit && clientScriptExpression.transmitList.length > 0){
-            reportError(this.diagnostics, clientScriptExpression.transmitList[0], DiagnosticMessage.HOOK_TRANSMIT_LIST_UNEXPECTED);
+            clientScriptExpression.transmitList[0].reportError(this.diagnostics, DiagnosticMessage.HOOK_TRANSMIT_LIST_UNEXPECTED);
             clientScriptExpression.type = MetaType.Error;
             return;
         }
@@ -762,7 +754,7 @@ export class TypeChecking extends AstVisitor<void> {
                 throw new Error(`Unexpected callExpression type: ${callExpression}`);
             }
 
-            reportError(this.diagnostics, callExpression, errorMessage, name, actualType.representation);
+            callExpression.reportError(this.diagnostics, errorMessage, name, actualType.representation);
             return;
         }
 
@@ -778,7 +770,7 @@ export class TypeChecking extends AstVisitor<void> {
         const symbol = this.table.find(SymbolType.localVariable(), name) as LocalVariableSymbol | null;
         if (!symbol) {
             // Trying to reference a variable that isn't defined.
-            reportError(this.diagnostics, localVariableExpression, DiagnosticMessage.LOCAL_REFERENCE_UNRESOLVED, name);
+            localVariableExpression.reportError(this.diagnostics, DiagnosticMessage.LOCAL_REFERENCE_UNRESOLVED, name);
             localVariableExpression.type = MetaType.Error;
             return;
         }
@@ -786,14 +778,14 @@ export class TypeChecking extends AstVisitor<void> {
         const symbolIsArray = (symbol.type instanceof ArrayType);
         if (!symbolIsArray && localVariableExpression.isArray) {
             // Trying to reference non-array local variable and specifying an index.
-            reportError(this.diagnostics, localVariableExpression, DiagnosticMessage.LOCAL_REFERENCE_NOT_ARRAY, name);
+            localVariableExpression.reportError(this.diagnostics, DiagnosticMessage.LOCAL_REFERENCE_NOT_ARRAY, name);
             localVariableExpression.type = MetaType.Error;
             return;
         }
 
         if (symbolIsArray && !localVariableExpression.isArray) {
             // Trying to reference array variable without specifying index in which to access.
-            reportError(this.diagnostics, localVariableExpression, DiagnosticMessage.LOCAL_ARRAY_REFERENCE_NOINDEX, name);
+            localVariableExpression.reportError(this.diagnostics, DiagnosticMessage.LOCAL_ARRAY_REFERENCE_NOINDEX, name);
             localVariableExpression.type = MetaType.Error;
             return;
         }
@@ -817,7 +809,7 @@ export class TypeChecking extends AstVisitor<void> {
 
         if (!symbol ||!(symbol.type instanceof GameVarType)) {
             gameVariableExpression.type = MetaType.Error;
-            reportError(this.diagnostics, gameVariableExpression, DiagnosticMessage.GAME_REFERENCE_UNRESOLVED, name);
+            gameVariableExpression.reportError(this.diagnostics, DiagnosticMessage.GAME_REFERENCE_UNRESOLVED, name);
             return;
         }
 
@@ -831,7 +823,7 @@ export class TypeChecking extends AstVisitor<void> {
         // Constants rely on having a type to parse the constant value for.
         const typeHint = constantVariableExpression.typeHint;
         if (!typeHint) {
-            reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.CONSTANT_UNKNOWN_TYPE, name);
+            constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.CONSTANT_UNKNOWN_TYPE, name);
             constantVariableExpression.type = MetaType.Error;
             return;
         } else if (typeHint == MetaType.Error) {
@@ -847,7 +839,7 @@ export class TypeChecking extends AstVisitor<void> {
         // Lookup the constant.
         const symbol = this.rootTable.find(SymbolType.constant(), name) as ConstantSymbol;
         if (!symbol) {
-            reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.CONSTANT_REFERENCE_UNRESOLVED, name);
+            constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.CONSTANT_REFERENCE_UNRESOLVED, name);
             constantVariableExpression.type = MetaType.Error;
             return;
         }
@@ -860,7 +852,7 @@ export class TypeChecking extends AstVisitor<void> {
                 .join(" -> ");
             
             stack += ` -> ^${symbol.name}`;
-            reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.CONSTANT_CYCLIC_REF, stack);
+            constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.CONSTANT_CYCLIC_REF, stack);
             constantVariableExpression.type = MetaType.Error;
             return;
         }
@@ -891,7 +883,7 @@ export class TypeChecking extends AstVisitor<void> {
             
             // Verify that the expression is parsed properly.
             if (!parsedExpression) {
-                reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.CONSTANT_PARSE_ERROR, symbol.value, typeHint.representation);
+                constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.CONSTANT_PARSE_ERROR, symbol.value, typeHint.representation);
                 constantVariableExpression.type = MetaType.Error;
                 return;
             }
@@ -902,7 +894,7 @@ export class TypeChecking extends AstVisitor<void> {
 
             // Verify the constant evaluates to a constant expression (No macros!).
             if (!this.isConstantExpression(parsedExpression)) {
-                reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.CONSTANT_NONCONSTANT, symbol.value);
+                constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.CONSTANT_NONCONSTANT, symbol.value);
                 constantVariableExpression.type = MetaType.Error;
                 return;
             }
@@ -1040,7 +1032,7 @@ export class TypeChecking extends AstVisitor<void> {
         if (!symbol) return;
 
         if (symbol instanceof ScriptSymbol && symbol.trigger === this.commandTrigger && symbol.parameters !== MetaType.Unit) {
-            reportError(this.diagnostics, identifier, DiagnosticMessage.GENERIC_TYPE_MISMATCH, "<unit>", symbol.parameters.representation);
+            identifier.reportError(this.diagnostics, DiagnosticMessage.GENERIC_TYPE_MISMATCH, "<unit>", symbol.parameters.representation);
         }
 
         // TODO: This might need some extra fallback handling.
@@ -1080,14 +1072,14 @@ export class TypeChecking extends AstVisitor<void> {
         // Unable to resolve the symbol.
         if (!symbol) {
             node.type = MetaType.Error;
-            reportError(this.diagnostics, node, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, name);
+            node.reportError(this.diagnostics, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, name);
             return null;
         }
 
         // Compiler error if the symbol type isn't defined here.
         if (!type) {
             node.type = MetaType.Error;
-            reportError(this.diagnostics, node, DiagnosticMessage.UNSUPPORTED_SYMBOLTYPE_TO_TYPE, symbol.constructor.name);
+            node.reportError(this.diagnostics, DiagnosticMessage.UNSUPPORTED_SYMBOLTYPE_TO_TYPE, symbol.constructor.name);
             return null;
         }
 
@@ -1132,9 +1124,9 @@ export class TypeChecking extends AstVisitor<void> {
     override visitNode(node: Node): void {
         const parent = node.parent;
         if (!parent) {
-            reportInfo(this.diagnostics, node, `Unhandled node: ${node.constructor.name}.`);
+            node.reportInfo(this.diagnostics, `Unhandled node: ${node.constructor.name}.`);
         } else {
-            reportInfo(this.diagnostics, node, `Unhandled node: ${node.constructor.name}. Parent: ${parent.constructor.name}.`);
+            node.reportInfo(this.diagnostics, `Unhandled node: ${node.constructor.name}. Parent: ${parent.constructor.name}.`);
         }
     }
 
@@ -1201,7 +1193,7 @@ export class TypeChecking extends AstVisitor<void> {
 
         if (!match && reportErrors) {
             const actualRepresentation = actual === MetaType.Unit ? "<unit>" : actual.representation;
-            reportError(this.diagnostics, node, DiagnosticMessage.GENERIC_TYPE_MISMATCH, actualRepresentation, expected.representation);
+            node.reportError(this.diagnostics, DiagnosticMessage.GENERIC_TYPE_MISMATCH, actualRepresentation, expected.representation);
         }
 
         return match;

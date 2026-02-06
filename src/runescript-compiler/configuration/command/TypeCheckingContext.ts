@@ -152,7 +152,7 @@ export class TypeCheckingContext {
         const argumentTypes: Type[] = [];
 
         for (const arg of args) {
-            if (!arg.nullableType) {
+            if (!arg.getNullableType()) {
                 this.visitExpression(arg);
             }
             argumentTypes.push(arg.type!);
@@ -168,7 +168,7 @@ export class TypeCheckingContext {
      * @see TupleType.fromList
      */
     public collectTypes(...expressions: Array<Expression | null | undefined>): Type {
-        return TupleType.fromList(expressions.filter((e): e is Expression => !!e).map(e => e.nullableType!));
+        return TupleType.fromList(expressions.filter((e): e is Expression => !!e).map(e => e.getNullableType()!));
     }
 
     /**

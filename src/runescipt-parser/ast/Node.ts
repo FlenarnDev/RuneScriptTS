@@ -1,3 +1,6 @@
+import { Diagnostic } from '../../runescript-compiler/diagnostics/Diagnostic';
+import { Diagnostics } from '../../runescript-compiler/diagnostics/Diagnostics';
+import { DiagnosticType } from '../../runescript-compiler/diagnostics/DiagnosticType';
 import { AstVisitor } from './AstVisitor';
 import { NodeSourceLocation } from './NodeSourceLocation';
 
@@ -86,5 +89,26 @@ export abstract class Node {
     }
 
     return null;
+  }
+
+  /**
+   * Helper function to report a diagnostic with the type of [DiagnosticType.INFO].
+   */
+  public reportInfo(diagnostics: Diagnostics, message: string, ...args: unknown[]) {
+      diagnostics.report(new Diagnostic(DiagnosticType.INFO, this, message, ...args));
+  }
+
+  /**
+   * Helper function to report a diagnostic with the type of [DiagnosticType.WARNING].
+   */
+  public reportWarning(diagnostics: Diagnostics, message: string, ...args: unknown[]) {
+      diagnostics.report(new Diagnostic(DiagnosticType.WARNING, this, message, ...args));
+  }
+  
+  /**
+   * Helper function to report a diagnostic with the type of [DiagnosticType.ERROR].
+   */
+  public reportError(diagnostics: Diagnostics, message: string, ...args: unknown[]) {
+      diagnostics.report(new Diagnostic(DiagnosticType.ERROR, this, message, ...args))
   }
 }

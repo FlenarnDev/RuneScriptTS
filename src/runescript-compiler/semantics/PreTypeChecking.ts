@@ -21,7 +21,6 @@ import { PrimitiveType } from '../type/PrimitiveType';
 import { TupleType } from '../type/TupleType';
 import { Type } from '../type/Type';
 import { TypeManager } from '../type/TypeManager';
-import { reportError } from '../diagnostics/DiagnosticHelpers';
 
 /**
  * An [AstVisitor] implementation that handles the following.
@@ -91,7 +90,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         const trigger = this.triggerManager.findOrNull(script.trigger.text);
 
         if (!trigger) {
-            reportError(this.diagnostics, script.trigger, DiagnosticMessage.SCRIPT_TRIGGER_INVALID, script.trigger.text);
+            script.trigger.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_INVALID, script.trigger.text);
         } else {
             script.triggerType = trigger;
         }
@@ -102,7 +101,7 @@ export class PreTypeChecking extends AstVisitor<void> {
              * The only reason the '*' symbol is allowed is to allow defining cases like
              * "npc_queue" and "npc_queue*" as two different commands since they have different semantics.
              */
-            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_COMMAND_ONLY);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_COMMAND_ONLY);
         }
 
         // Verify subject matched what the triggers requires.
@@ -125,7 +124,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             for (const token of returnTokens) {
                 const type = this.typeManager.findOrNull(token.text);
                 if (!type) {
-                    reportError(this.diagnostics, token, DiagnosticMessage.GENERIC_INVALID_TYPE, token.text);
+                    token.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, token.text);
                 }
                 returns.push(type ?? MetaType.Error);
             }
@@ -148,7 +147,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
             const inserted = this.rootTable.insert(SymbolType.serverScript(trigger), scriptSymbol);
             if (!inserted) {
-                reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_REDECLARATION, trigger.identifier, script.nameString);
+                script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_REDECLARATION, trigger.identifier, script.nameString);
             } else {
                 // Only set the symbol if it was actually inserted
                 script.symbol = scriptSymbol;
@@ -201,14 +200,14 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
         // Subject references a type, verify it allows global subject.
         if (this.isTypeMode(mode)) {
             if (!mode.global) {
-                reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_GLOBAL, trigger.identifier);
+                script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_SUBJECT_NO_GLOBAL, trigger.identifier);
             }
             return;
         }
@@ -226,14 +225,14 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
         // Subject references a type, verify it allows category subject.
         if (this.isTypeMode(mode)) {
             if (!mode.category) {
-                reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_NO_CATEGORY, trigger.identifier);
+                script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_SUBJECT_NO_CATEGORY, trigger.identifier);
                 return;
             }
 
@@ -253,7 +252,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Trigger only allows global
         if (mode === SubjectMode.None) {
-            reportError(this.diagnostics, script.name, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_SUBJECT_ONLY_GLOBAL, trigger.identifier);
             return;
         }
 
@@ -271,7 +270,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Format: 'level_mx_mz'
         const parts = coord.split("_");
         if (parts.length !== 3) {
-            reportError(this.diagnostics, script.name, "Mapzone subject must be of the form: 'level_mx_mz'.")
+            script.name.reportError(this.diagnostics, "Mapzone subject must be of the form: 'level_mx_mz'.")
             return -1;
         }
 
@@ -281,11 +280,11 @@ export class PreTypeChecking extends AstVisitor<void> {
         const mzInt = parseInt(mz, 10);
 
         if (mxInt < 0 || mxInt > 255 || mzInt < 0 || mzInt > 255) {
-            reportError(this.diagnostics, script.name, "Invalid mapzone coord.");
+            script.name.reportError(this.diagnostics, "Invalid mapzone coord.");
         }
 
         if (levelInt !== 0) {
-            reportError(this.diagnostics, script.name, "Mapzone affect all level, just specify '0'.");
+            script.name.reportError(this.diagnostics, "Mapzone affect all level, just specify '0'.");
             return -1;
         }
 
@@ -299,7 +298,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Format: 'level_mx_mz_lx_lz'
         const parts = coord.split("_");
         if (parts.length !== 5) {
-            reportError(this.diagnostics, script.name, "Zone subject must be of the form: 'level_mx_mz_lx_lz'.")
+            script.name.reportError(this.diagnostics, "Zone subject must be of the form: 'level_mx_mz_lx_lz'.")
             return -1;
         }
 
@@ -317,11 +316,11 @@ export class PreTypeChecking extends AstVisitor<void> {
             lxInt < 0 || lxInt > 63 ||
             lzInt < 0 || lzInt > 63 
         ) {
-            reportError(this.diagnostics, script.name, "Invalid zone coord.");
+            script.name.reportError(this.diagnostics, "Invalid zone coord.");
         }
 
         if (lxInt % 8 !== 0 || lzInt % 8 !== 0) {
-            reportError(this.diagnostics, script.name, "Local zone coord must be a multiple of 8");
+            script.name.reportError(this.diagnostics, "Local zone coord must be a multiple of 8");
             return -1;
         }
 
@@ -349,12 +348,12 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         const symbol = this.rootTable.find(SymbolType.basic(type), subject);
         if (!symbol) {
-            reportError(this.diagnostics, script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
             return;
         }
 
         if (!('type' in symbol && 'isProtected' in symbol)) {
-            reportError(this.diagnostics, script.name, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
+            script.name.reportError(this.diagnostics, DiagnosticMessage.GENERIC_UNRESOLVED_SYMBOL, subject);
             return;
         }
 
@@ -369,10 +368,10 @@ export class PreTypeChecking extends AstVisitor<void> {
         const scriptParameterType = script.parameterType;
 
         if (trigger && !trigger.allowParameters && parameters && parameters.length > 0) {
-            reportError(this.diagnostics, parameters[0], DiagnosticMessage.SCRIPT_TRIGGER_NO_PARAMETERS, trigger.identifier);
+            parameters[0].reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_NO_PARAMETERS, trigger.identifier);
         } else if (triggerParameterType && scriptParameterType !== triggerParameterType) {
             const expectedPArameterType = triggerParameterType.representation;
-            reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_PARAMETERS, script.trigger.text, expectedPArameterType);
+            script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_PARAMETERS, script.trigger.text, expectedPArameterType);
         }
     }
 
@@ -384,16 +383,10 @@ export class PreTypeChecking extends AstVisitor<void> {
         const scriptReturns = script.returnType;
 
         if (trigger && !trigger.allowReturns && scriptReturns !== MetaType.Nothing) {
-            reportError(this.diagnostics, script, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
+            script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
         } else if (triggerReturns && scriptReturns !== triggerReturns) {
             const exprectedReturnTypes = triggerReturns.representation;
-            reportError(
-                this.diagnostics,
-                script,
-                DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_RETURNS,
-                script.trigger.text,
-                exprectedReturnTypes
-            );
+            script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_RETURNS, script.trigger.text, exprectedReturnTypes);
         }
     }
 
@@ -404,7 +397,7 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Type isn't valid, report the error.
         if (!type) {
-            reportError(this.diagnostics, parameter, DiagnosticMessage.GENERIC_INVALID_TYPE, typeText);
+            parameter.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeText);
         }
 
         // Attempt to inster the local variable into the symbol talbe and display error if failed to insert.
@@ -412,7 +405,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         const inserted = this.table.insert(SymbolType.localVariable(), symbol);
 
         if (!inserted) {
-            reportError(this.diagnostics, parameter, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
+            parameter.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
 
         parameter.symbol = symbol;
@@ -434,9 +427,9 @@ export class PreTypeChecking extends AstVisitor<void> {
 
         // Notify invalid type.
         if (!type) {
-            reportError(this.diagnostics, switchStatement.typeToken, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
+            switchStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
         } else if (!type.options.allowSwitch){
-            reportError(this.diagnostics, switchStatement.typeToken, DiagnosticMessage.SWITCH_INVALID_TYPE, type.representation);
+            switchStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.SWITCH_INVALID_TYPE, type.representation);
         }
 
         // Visit the condition to resolve any reference.

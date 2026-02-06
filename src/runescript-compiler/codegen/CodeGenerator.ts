@@ -55,7 +55,6 @@ import { Label } from './script/Label';
 import { LabelGenerator } from './script/LabelGenerator';
 import { RuneScript } from './script/RuneScript';
 import { SwitchCase } from './script/SwitchTable';
-import { reportError } from '../diagnostics/DiagnosticHelpers'
 
 export class CodeGenerator extends AstVisitor<void> {
     /**
@@ -282,7 +281,7 @@ export class CodeGenerator extends AstVisitor<void> {
                 // Assume if we get to this point that the left and right types match and are valid.
                 const baseType = condition.left.type.baseType;
                 if (baseType == null) {
-                    reportError(this.diagnostics, condition.left, DiagnosticMessage.TYPE_HAS_NO_BASETYPE, condition.left.type);
+                    condition.left.reportError(this.diagnostics, DiagnosticMessage.TYPE_HAS_NO_BASETYPE, condition.left.type);
                     return;
                 }
 
@@ -315,7 +314,7 @@ export class CodeGenerator extends AstVisitor<void> {
         } else if (condition instanceof ParenthesizedExpression) {
             this.generateCondition(condition.expression, block, branchTrue, branchFalse);
         } else {
-            reportError(this.diagnostics, condition, DiagnosticMessage.INVALID_CONDITION, condition.constructor.name);
+            condition.reportError(this.diagnostics, DiagnosticMessage.INVALID_CONDITION, condition.constructor.name);
         }
     }
 
@@ -353,7 +352,7 @@ export class CodeGenerator extends AstVisitor<void> {
 
                 if (constantKey == null) {
                     // 'null' is only returned if the constant wasn't defined or the expression wasn't supported.
-                    reportError(this.diagnostics, keyExpression, DiagnosticMessage.NULL_CONSTANT, keyExpression.constructor.name);
+                    keyExpression.reportError(this.diagnostics, DiagnosticMessage.NULL_CONSTANT, keyExpression.constructor.name);
                     continue;
                 }
 
@@ -460,7 +459,7 @@ export class CodeGenerator extends AstVisitor<void> {
             const reference = variable.reference;
 
             if (reference == null) {
-                reportError(this.diagnostics, variable, DiagnosticMessage.SYMBOL_IS_NULL);
+                variable.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
                 return;
             }
 
@@ -493,7 +492,7 @@ export class CodeGenerator extends AstVisitor<void> {
         for (const type of types) {
             const baseType = type.baseType;
             if (baseType == null) {
-                reportError(this.diagnostics, expressionStatement, DiagnosticMessage.TYPE_HAS_NO_BASETYPE, type);
+                expressionStatement.reportError(this.diagnostics, DiagnosticMessage.TYPE_HAS_NO_BASETYPE, type);
                 return;
             }
             this.instruction(Opcode.Discard, baseType);
@@ -507,7 +506,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitLocalVariableExpression(localVariableExpression: LocalVariableExpression): void {
         const reference = localVariableExpression.reference as LocalVariableSymbol | null;
         if (reference == null) {
-            reportError(this.diagnostics, localVariableExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            localVariableExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
         this.lineInstruction(localVariableExpression);
@@ -518,7 +517,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitGameVariableExpression(gameVariableExpression: GameVariableExpression): void {
         const reference = gameVariableExpression.reference as BasicSymbol | null;
         if (reference == null) {
-            reportError(this.diagnostics, gameVariableExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            gameVariableExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
@@ -533,7 +532,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitConstantVariableExpression(constantVariableExpression: ConstantVariableExpression): void {
         const subExpression = constantVariableExpression.subExpression;
         if (subExpression == null) {
-            reportError(this.diagnostics, constantVariableExpression, DiagnosticMessage.EXPRESSION_NO_SUBEXPR);
+            constantVariableExpression.reportError(this.diagnostics, DiagnosticMessage.EXPRESSION_NO_SUBEXPR);
             return;
         }
         this.visitNodeOrNull(subExpression);
@@ -582,7 +581,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitCommandCallExpression(commandCallExpression: CommandCallExpression): void {
         const symbol = commandCallExpression.symbol;
         if (symbol == null) {
-            reportError(this.diagnostics, commandCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            commandCallExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
@@ -609,7 +608,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitProcCallExpression(procCallExpression: ProcCallExpression): void {
         const symbol = procCallExpression.symbol;
         if (symbol == null) {
-            reportError(this.diagnostics, procCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            procCallExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
@@ -621,7 +620,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitJumpCallExpression(jumpCallExpression: JumpCallExpression): void {
         const symbol = jumpCallExpression.symbol;
         if (symbol == null) {
-            reportError(this.diagnostics, jumpCallExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            jumpCallExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
@@ -633,7 +632,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitClientScriptExpression(clientScriptExpression: ClientScriptExpression): void {
         const symbol = clientScriptExpression.symbol as ServerScriptSymbol | null;
         if (symbol == null) {
-            reportError(this.diagnostics, clientScriptExpression, DiagnosticMessage.SYMBOL_IS_NULL);
+            clientScriptExpression.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
@@ -752,7 +751,7 @@ export class CodeGenerator extends AstVisitor<void> {
     override visitIdentifier(identifier: Identifier): void {
         const reference = identifier.reference;
         if (reference == null) {
-            reportError(this.diagnostics, identifier, DiagnosticMessage.SYMBOL_IS_NULL);
+            identifier.reportError(this.diagnostics, DiagnosticMessage.SYMBOL_IS_NULL);
             return;
         }
 
