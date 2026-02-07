@@ -22,7 +22,7 @@ export class BinaryFileScriptWriter extends BinaryScriptWriter {
         }
     }
 
-    outputScript(script: RuneScript, data: Buffer): void {
+    override outputScript(script: RuneScript, data: Buffer): void {
         const id = this.idProvider.get(script.symbol);
         const scriptPath = path.join(this.output, String(id));
 
