@@ -29,8 +29,8 @@ export class TriggerManager {
     /**
      * Registers all values within a trigger "enum" the name lookup.
      */
-    registerAll(enumMimic: Record<string, TriggerType>): void {
-        for (const value of Object.values(enumMimic)) {
+    registerAll<T extends TriggerType>(enumClass: HasAll<T>) {
+        for (const value of enumClass.ALL) {
             this.registerTrigger(value);
         }
     }
@@ -54,4 +54,9 @@ export class TriggerManager {
     findOrNull(name: string): TriggerType | null {
         return this.nameToTrigger.get(name) ?? null;
     }
+}
+
+// TODO: Better solution for this.
+interface HasAll<T> {
+    readonly ALL: readonly T[];
 }
