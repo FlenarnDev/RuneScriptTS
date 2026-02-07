@@ -13,7 +13,7 @@ import { ScriptVarType } from "../type/ScriptVarType";
  * def_obj $item = enum(int, obj, item_list, $index);
  * ```
  */
-export class EnumCommandHanlder implements DynamicCommandHandler {
+export class EnumCommandHandler implements DynamicCommandHandler {
     typeCheck(context: TypeCheckingContext): void {
         // Fetch the arguments (minus last).
         const inputTypeExpression = context.checkTypeArgument(0);
