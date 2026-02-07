@@ -6,7 +6,8 @@ import { TypeManager } from './type/TypeManager';
 import { DiagnosticsHandler, BaseDiagnosticsHandler } from './diagnostics/DiagnosticsHandler';
 import { ScriptWriter } from './writer/ScriptWriter';
 import { PointerHolder } from './pointer/PointerHolder';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { PrimitiveType } from './type/PrimitiveType';
 import { CommandTrigger } from './trigger/CommandTrigger';
 import { MetaType } from './type/MetaType';
@@ -394,10 +395,10 @@ export class ScriptCompiler{
      */
     private walkTopDown(dir: string): string[] {
         let results: string[] = [];
-        for (const entry of fs.readdirSync(dir { withFileTypes: true })) {
+        for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
             const fullPath = path.join(dir, entry.name);
             if (entry.isDirectory()) {
-                results = results.concat(this.walkTopDown(fullpath));
+                results = results.concat(this.walkTopDown(fullPath));
             } else {
                 results.push(fullPath);
             }
