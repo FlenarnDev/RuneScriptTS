@@ -3,7 +3,7 @@ import { BaseVarType } from "../../runescript-compiler/type/BaseVarType";
 import { TupleType } from "../../runescript-compiler/type/TupleType";
 import { BaseScriptWriter, BaseScriptWriterContext } from "../../runescript-compiler/writer/BaseScriptWriter";
 import { ServerScriptOpcode } from "../ServerScriptOpcode";
-import { DEBUGPROC } from "../trigger/ServerTriggerType";
+import { ServerTriggerType } from "../trigger/ServerTriggerType";
 
 export class BinaryScriptWriterContext extends BaseScriptWriterContext {
     /**
@@ -128,7 +128,7 @@ export class BinaryScriptWriterContext extends BaseScriptWriterContext {
         buf.writeInt32BE(this.lookupKey, offset);
         offset += 4;
 
-        if (this.script.trigger === DEBUGPROC) {
+        if (this.script.trigger === ServerTriggerType.DEBUGPROC) {
             const params = TupleType.toList(this.script.symbol.parameters);
             buf.writeUInt8(params.length, offset++);
             for (const param of params) {
