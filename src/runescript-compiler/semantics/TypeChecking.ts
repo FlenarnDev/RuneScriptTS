@@ -658,11 +658,7 @@ export class TypeChecking extends AstVisitor<void> {
         // Lookup the symbol using the symbol type and name.
         const name = call.name.text;
         const symbolType = SymbolType.serverScript(trigger);
-        console.debug(symbolType);
         const symbol = this.rootTable.find(symbolType, name) as ScriptSymbol | null;
-        console.debug(symbol);
-
-        throw new Error();
 
         if (!symbol) {
             call.type = MetaType.Error;
