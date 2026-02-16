@@ -262,7 +262,6 @@ export class ScriptCompiler{
 
         const preTypeChecking = new PreTypeChecking(this.types, this.triggers, this.rootTable, diagnostics);
         for (const file of files) {
-            this.logger.debug(`Pre-check on script: ${file.source.name}.`)
             const fileStart = performance.now();
             file.accept(preTypeChecking);
             const fileTime = (performance.now() - fileStart).toFixed(2);
@@ -313,7 +312,7 @@ export class ScriptCompiler{
             file.accept(codeGen);
             scripts.push(...codeGen.scripts);
             const fileTime = (performance.now() - fileStart).toFixed(2);
-            this.logger.trace(`Generated code for ${file.source.name} in ${fileTime}ms.`);
+            this.logger.debug(`Generated code for ${file.source.name} in ${fileTime}ms.`);
         }
         const codeGenTime = (performance.now() - codeGenStart).toFixed(2);
         this.logger.debug(`Finished codegen in ${codeGenTime}ms.`);
@@ -353,7 +352,7 @@ export class ScriptCompiler{
         const scriptWriterStart = performance.now();
         for (const script of scripts) {
             if (this.isExcluded(script.sourceName)) {
-                this.logger.trace(`Skipping writing of excluded file: ${script.sourceName}`);
+                this.logger.debug(`Skipping writing of excluded file: ${script.sourceName}`);
                 continue;
             }
 
