@@ -103,8 +103,21 @@ function loadSpecialSymbols(symbolPaths: string[], mapper: SymbolMapper, command
                 mapper.putCommand(id, name);
             }
         }
+
+        // Load pre-existing script ID mappings
+        const scriptMappings = join(symbolPath, 'runescript.sym');
+        if (existsSync(scriptMappings)) {
+            const lines = readFileSync(scriptMappings, 'utf-8').split(/\r?\n/);
+            for (const line of lines) {
+                if (!line.trim()) continue;
+                const split = line.split('\t');
+                const id = parseInt(split[0], 10);
+                const name = split[1];
+                //console.log(`Script mapping: ${id}, '${name}'.`);
+                mapper.putScript(id, name);
+            }
+        }
     }
-    //throw new Error(`booooom`);
 }
 
 function parsePointerList(text?: string): Set<PointerType> {
