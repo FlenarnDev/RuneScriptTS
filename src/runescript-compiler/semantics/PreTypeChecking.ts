@@ -390,8 +390,6 @@ export class PreTypeChecking extends AstVisitor<void> {
     }
 
     override visitParameter(parameter: Parameter): void {
-        //console.log(parameter);
-
         const name = parameter.name.text;
         const typeText = parameter.typeToken.text;
         const type = this.typeManager.findOrNull(typeText, true);

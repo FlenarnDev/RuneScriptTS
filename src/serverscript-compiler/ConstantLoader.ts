@@ -14,8 +14,6 @@ export class ConstantLoader extends SymbolLoader {
         for (const line of contents.split(/\r?\n/)) {
             const split = line.split('\t', 2);
             if (split.length !== 2) continue;
-            console.log(split[0]);
-            console.log(split[1]);
 
             this.addConstant(table, split[0], split[1]);
         }

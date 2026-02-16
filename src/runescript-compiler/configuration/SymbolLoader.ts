@@ -42,11 +42,10 @@ export abstract class SymbolLoader {
         const symbol: BasicSymbol = new BasicSymbol(name, type, isProtected);
 
         if (!symbolTable.insert(SymbolType.basic(type), symbol)) {
-            console.log(symbol.type);
             throw new Error(`Unable to add basic: type=${type}, name=${name}`);
         }
 
-        console.debug(`Added basic: type=${type.baseType}, name=${name}`);
+        //console.debug(`Added basic: type=${type.baseType}, name=${name}`);
 
         return symbol;
     }
