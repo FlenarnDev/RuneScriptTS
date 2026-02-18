@@ -11,9 +11,8 @@ import { ServerScriptCompiler } from './ServerScriptCompiler';
 import * as console from 'console';
 
 
-export function main(args: string[]) {
-    const configPath = args.length > 0 ? resolve(args[0]) : resolve('neptune.toml');
-    const config = loadConfig(configPath);
+export function CompileServerScript() {
+    const config = loadConfig('neptune.toml');
 
     const sourcePaths = config.sourcePaths.map(p => resolve(p));
     const symbolPaths = config.symbolPaths.map(p => resolve(p));
@@ -61,7 +60,7 @@ function loadConfig(configPath: string) : ServerScriptCompilerConfig {
         }
     };
 
-    console.debug(`Loading configuration from ${configPath}.`);
+    // console.debug(`Loading configuration from ${configPath}.`);
     return config;
 }
 
@@ -130,8 +129,4 @@ function parsePointerList(text?: string): Set<PointerType> {
         else throw new Error(`Invalid pointer name: ${name}.`);
     }
     return pointers;
-}
-
-if (import.meta.main) {
-    main(process.argv.slice(2));
 }

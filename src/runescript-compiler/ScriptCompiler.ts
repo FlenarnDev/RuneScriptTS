@@ -251,10 +251,10 @@ export class ScriptCompiler{
         const diagnostics = new Diagnostics();
         const fileNodes: ScriptFile[] = [];
         let fileCount = 0;
-        const start = performance.now();
+        // const start = performance.now();
 
         for (const sourcePath of this.sourcePaths) {
-            this.logger.debug(`Parsing files in '${sourcePath}'.`);
+            // this.logger.debug(`Parsing files in '${sourcePath}'.`);
 
             // Recursively walk all files.
             const files = this.walkTopDown(sourcePath);
@@ -272,8 +272,8 @@ export class ScriptCompiler{
                 fileCount++;
             }
         }
-        const time = (performance.now() - start).toFixed(2);
-        this.logger.debug(`Parsed ${fileCount} files in ${time}ms.`);
+        // const time = (performance.now() - start).toFixed(2);
+        // this.logger.debug(`Parsed ${fileCount} files in ${time}ms.`);
         this.diagnosticsHandler.handleParse?.(diagnostics);
 
         return [diagnostics.hasErrors() === false, fileNodes];
@@ -287,8 +287,8 @@ export class ScriptCompiler{
         const diagnostics = new Diagnostics();
 
         // Pre-type check: This adds all scripts to the symbol table for lookup in the next phase.
-        this.logger.debug("Starting pre-type checking.");
-        const preTypeStart = performance.now();
+        // this.logger.debug("Starting pre-type checking.");
+        // const preTypeStart = performance.now();
 
         const preTypeChecking = new PreTypeChecking(this.types, this.triggers, this.rootTable, diagnostics);
         for (const file of files) {
@@ -298,12 +298,12 @@ export class ScriptCompiler{
             //this.logger.debug(`Pre-type checked ${file.source.name} in ${fileTime}ms.`);
         }
 
-        const preTypeCheckingTime = (performance.now() - preTypeStart).toFixed(2);
-        this.logger.debug(`Finished pre-type checking in ${preTypeCheckingTime}ms.`);
+        // const preTypeCheckingTime = (performance.now() - preTypeStart).toFixed(2);
+        // this.logger.debug(`Finished pre-type checking in ${preTypeCheckingTime}ms.`);
 
         // Type check: This does all major type checking.
-        this.logger.debug("Starting type checking.");
-        const typeStart = performance.now();
+        // this.logger.debug("Starting type checking.");
+        // const typeStart = performance.now();
 
         const typeChecking = new TypeChecking(this.types, this.triggers, this.rootTable, this.dynamicCommandHandlers, diagnostics);
         for (const file of files) {
@@ -313,8 +313,8 @@ export class ScriptCompiler{
             //this.logger.debug(`Type checked ${file.source.name} in ${fileTime}ms.`);
         }
 
-        const typeCheckingTime = (performance.now() - typeStart).toFixed(2);
-        this.logger.debug(`Finished type checking in ${typeCheckingTime}ms.`);
+        // const typeCheckingTime = (performance.now() - typeStart).toFixed(2);
+        // this.logger.debug(`Finished type checking in ${typeCheckingTime}ms.`);
 
         // Call the diagnostics handler.
         this.diagnosticsHandler.handleTypeChecking?.(diagnostics);
@@ -334,18 +334,18 @@ export class ScriptCompiler{
          * and add to a list that we return.
          */
         const scripts: RuneScript[] = [];
-        this.logger.debug("Starting codegen.");
-        const codeGenStart = performance.now();
+        // this.logger.debug("Starting codegen.");
+        // const codeGenStart = performance.now();
         for (const file of files) {
-            const fileStart = performance.now();
+            // const fileStart = performance.now();
             const codeGen = new CodeGenerator(this.rootTable, this.dynamicCommandHandlers, diagnostics);
             file.accept(codeGen);
             scripts.push(...codeGen.scripts);
-            const fileTime = (performance.now() - fileStart).toFixed(2);
+            // const fileTime = (performance.now() - fileStart).toFixed(2);
             //this.logger.debug(`Generated code for ${file.source.name} in ${fileTime}ms.`);
         }
-        const codeGenTime = (performance.now() - codeGenStart).toFixed(2);
-        this.logger.debug(`Finished codegen in ${codeGenTime}ms.`);
+        // const codeGenTime = (performance.now() - codeGenStart).toFixed(2);
+        // this.logger.debug(`Finished codegen in ${codeGenTime}ms.`);
 
         // Call the diagnostics handler.
         this.diagnosticsHandler.handleCodeGeneration?.(diagnostics);
@@ -362,11 +362,11 @@ export class ScriptCompiler{
         const diagnostics = new Diagnostics();
 
         const pointerChecker = new PointerChecker(diagnostics, scripts, this.commandPointers);
-        this.logger.debug("Starting pointer checking.");
-        const pointerCheckStart = performance.now();
+        // this.logger.debug("Starting pointer checking.");
+        // const pointerCheckStart = performance.now();
         pointerChecker.run();
-        const pointerCheckTime = (performance.now() - pointerCheckStart).toFixed(2);
-        this.logger.debug(`Finished pointer checking in ${pointerCheckTime}ms.`);
+        // const pointerCheckTime = (performance.now() - pointerCheckStart).toFixed(2);
+        // this.logger.debug(`Finished pointer checking in ${pointerCheckTime}ms.`);
 
         // Call the diagnostics handler.
         this.diagnosticsHandler.handlePointerChecking?.(diagnostics);
@@ -378,21 +378,21 @@ export class ScriptCompiler{
      * Runs all [scripts] through the [ScriptWriter].
      */
     private write(scripts: RuneScript[]) {
-        this.logger.debug("Starting script writing.");
-        const scriptWriterStart = performance.now();
+        // this.logger.debug("Starting script writing.");
+        // const scriptWriterStart = performance.now();
         for (const script of scripts) {
             if (this.isExcluded(script.sourceName)) {
-                this.logger.debug(`Skipping writing of excluded file: ${script.sourceName}`);
+                // this.logger.debug(`Skipping writing of excluded file: ${script.sourceName}`);
                 continue;
             }
 
-            const scriptWriteTimeStart = performance.now();
+            // const scriptWriteTimeStart = performance.now();
             this.scriptWriter.write(script);
-            const scriptWriteTime = (performance.now() - scriptWriteTimeStart).toFixed(2);
+            // const scriptWriteTime = (performance.now() - scriptWriteTimeStart).toFixed(2);
             //this.logger.debug(`Wrote ${script.fullName} in ${scriptWriteTime}ms.`);
         }
-        const scriptWriterTime = (performance.now() - scriptWriterStart).toFixed(2);
-        this.logger.debug(`Finished script writing in ${scriptWriterTime}ms.`);
+        // const scriptWriterTime = (performance.now() - scriptWriterStart).toFixed(2);
+        // this.logger.debug(`Finished script writing in ${scriptWriterTime}ms.`);
     }
 
     /**

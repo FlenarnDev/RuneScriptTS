@@ -1,11 +1,26 @@
 {
-  "name": "runescriptts",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@lostcityrs/runescript",
+  "version": "0.9.0",
+  "description": "Compiler for a community-derived RuneScript implementation, written in TypeScript",
+  "license": "MIT",
+  "author": "LostCityRS",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LostCityRS/RuneScriptTS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LostCityRS/RuneScriptTS/issues"
+  },
+  "homepage": "https://github.com/LostCityRS/RuneScriptTS#readme",
+  "main": "dist/runescript.js",
+  "types": "dist/runescript.d.ts",
   "type": "module",
+  "files": [
+    "/dist"
+  ],
   "scripts": {
     "antlr": "antlr-ng -Dlanguage=TypeScript -o src/antlr --generate-visitor true --generate-listener false --exact-output-dir true src/antlr/RuneScriptLexer.g4 src/antlr/RuneScriptParser.g4",
-    "clean": "rm -rf dist"
+    "build": "bun build --target node --outfile dist/runescript.js --minify src/Compiler.ts"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
