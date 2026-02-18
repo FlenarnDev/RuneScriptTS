@@ -1,13 +1,15 @@
 import { BaseVarType } from "../../runescript-compiler/type/BaseVarType";
 import { Type } from "../../runescript-compiler/type/Type";
+import { MutableOptionsType, TypeOptions } from "../../runescript-compiler/type/TypeOptions";
 
 export class ScriptVarType extends Type {
     static readonly ALL: ScriptVarType[] = [];
 
-    readonly code?: string;
-    readonly baseType: BaseVarType;
-    readonly defaultValue: any;
-    readonly representation: string;
+    declare readonly code?: string;
+    declare readonly baseType: BaseVarType;
+    declare readonly defaultValue: any;
+    declare readonly representation: string;
+    declare readonly options: TypeOptions;
 
     private constructor(
         code: string,
@@ -20,6 +22,7 @@ export class ScriptVarType extends Type {
         this.baseType = baseType;
         this.defaultValue = defaultValue;
         this.representation = representation;
+        this.options = new MutableOptionsType();
 
         ScriptVarType.ALL.push(this);
     }
@@ -74,5 +77,4 @@ export class ScriptVarType extends Type {
     static readonly STRINGVECTOR = new ScriptVarType('¸', BaseVarType.INTEGER, -1, 'stringvector');
     static readonly MESANIM = new ScriptVarType('Á', BaseVarType.INTEGER, -1, 'mesanim');
     static readonly VERIFY_OBJECT = new ScriptVarType('®', BaseVarType.INTEGER, -1, 'verifyobj');
-
 }

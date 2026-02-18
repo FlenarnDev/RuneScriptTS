@@ -14,8 +14,8 @@ import { MutableOptionsType as MutableTypeOptions, TypeOptions } from './TypeOpt
 type TypeBuilder = (opts: MutableTypeOptions) => void;
 
 export class PrimitiveType extends Type {
-    readonly representation: string;
-    readonly options: TypeOptions;
+    declare readonly representation: string;
+    declare readonly options: TypeOptions;
 
     /**
      * A [PrimitiveType] type that only defines the [baseType] and [defaultValue].

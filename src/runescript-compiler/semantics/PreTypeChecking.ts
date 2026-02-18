@@ -112,7 +112,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         parameters?.forEach(param => param.accept(this));
 
         // Specify the parameter types for easy lookup later.
-        script.parameterType = TupleType.fromList(parameters?.map(p => p.symbol.type) ?? []);
+        script.parameterType = TupleType.fromList(parameters?.map(p => p.symbol.type ?? MetaType.Error) ?? []);
 
         // Verify parameters match what the trigger type allows.
         this.checkScriptParameters(trigger, script, parameters);
@@ -128,7 +128,7 @@ export class PreTypeChecking extends AstVisitor<void> {
                 }
                 returns.push(type ?? MetaType.Error);
             }
-            script.returnType = TupleType.fromList(returns);
+            script.returnType = TupleType.fromList(returns.map(t => t ?? MetaType.Error));
         } else {
             // Default return based on trigger
             script.returnType = !trigger
@@ -427,7 +427,7 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Notify invalid type.
         if (!type) {
             switchStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
-        } else if (!type.options.allowSwitch){
+        } else if (!type?.options?.allowSwitch){
             switchStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.SWITCH_INVALID_TYPE, type.representation);
         }
 

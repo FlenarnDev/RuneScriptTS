@@ -82,7 +82,7 @@ export class PointerChecker {
             const start = performance.now();
             this.validatePointers(script);
             const elapsed = performance.now() - start;
-            console.log(`Checked pointers for ${script.fullName} in ${elapsed.toFixed(2)}ms.`);
+            //console.log(`Checked pointers for ${script.fullName} in ${elapsed.toFixed(2)}ms.`);
         }
     }
     /**

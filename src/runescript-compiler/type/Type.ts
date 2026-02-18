@@ -12,7 +12,7 @@ export abstract class Type {
      * A string used to represent the type. This is what is used in scripts to reference it. E.g. `def_int` or `int`
      * would rely on there being a type with a representation of `int`.
      */
-    readonly representation: string;
+    readonly representation!: string;
 
     /**
      * The character representation of the type.
@@ -32,7 +32,7 @@ export abstract class Type {
     /**
      * Options the type allows or disallows.
      */
-    readonly options: TypeOptions;
+    readonly options!: TypeOptions;
 }
 
 export function createType(type: Omit<Type, "options"> & Partial<Pick<Type, "options">>): Type {

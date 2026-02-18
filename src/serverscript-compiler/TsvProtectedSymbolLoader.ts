@@ -45,7 +45,7 @@ export class TsvProtectedSymbolLoader extends SymbolLoader {
             const id = Number(split[0]);
             const name = split[1];
 
-            const subTypes = split.length >= 3 && split[2] !== "none" ? TupleType.fromList(split[2].split(",").map(typeName => compiler.types.find(typeName))) : MetaType.Unit;
+            const subTypes = split.length >= 3 && split[2] !== "none" ? TupleType.fromList(split[2].split(",").map(typeName => compiler.types.find(typeName) ?? MetaType.Error)) : MetaType.Unit;
 
             const isProtected = split.length >= 4 ? split[3] === "true" : false;
 

@@ -37,7 +37,7 @@ import { CoordLiteral } from '../../runescipt-parser/ast/expr/literal/CoordLiter
 import { IntegerLiteral } from '../../runescipt-parser/ast/expr/literal/IntegerLiteral';
 import { ConstantVariableExpression } from '../../runescipt-parser/ast/expr/variable/ConstantVariableExpression';
 import { SymbolType } from '../symbol/SymbolType';
-import type { NodeSourceLocation } from '../../runescipt-parser/ast/NodeSourceLocation';
+import { NodeSourceLocation } from '../../runescipt-parser/ast/NodeSourceLocation';
 import { GameVariableExpression } from '../../runescipt-parser/ast/expr/variable/GameVariableExpression';
 import { GameVarType } from '../type/wrapped/GameVarType';
 import { CallExpression } from '../../runescipt-parser/ast/expr/call/CallExpression';
@@ -201,7 +201,7 @@ export class TypeChecking extends AstVisitor<void> {
              * to report type mistmatches AND invalid condition at the same time.
              */
             this.visitNodeOrNull(expression);
-            this.checkTypeMatch(expression, PrimitiveType.BOOLEAN, expression.type);
+            this.checkTypeMatch(expression, PrimitiveType.BOOLEAN, expression.type ?? MetaType.Error);
         } else {
             // Report invalid condition expression on the erroneous node.
             invalidExpression.reportError(this.diagnostics, DiagnosticMessage.CONDITION_INVALID_NODE_TYPE);
@@ -243,7 +243,7 @@ export class TypeChecking extends AstVisitor<void> {
         const condition = switchStatement.condition;
         condition.typeHint = expectedType;
         this.visitNodeOrNull(condition);
-        this.checkTypeMatch(condition, expectedType, condition.type);
+        this.checkTypeMatch(condition, expectedType, condition.type ?? MetaType.Error);
 
         /**
          * TODO: Check for duplicate case lables (other than default).
@@ -264,12 +264,12 @@ export class TypeChecking extends AstVisitor<void> {
     }
 
     override visitSwitchCase(switchCase: SwitchCase): void {
-        const switchType = switchCase.findParentByType(SwitchStatement).type;
-        if (switchType == null) {
-            // The parent should always be a switch statemtn, if not we're in trouble...
+        const parentSwitch = switchCase.findParentByType(SwitchStatement);
+        if (!parentSwitch) {
             switchCase.reportError(this.diagnostics, DiagnosticMessage.CASE_WITHOUT_SWITCH);
             return;
         }
+        const switchType = parentSwitch.type;
 
         // Visit the case keys
         for (const key of switchCase.keys) {
@@ -329,14 +329,14 @@ export class TypeChecking extends AstVisitor<void> {
     }
 
     override visitDeclarationStatement(declarationStatement: DeclarationStatement): void {
-        const typeName = declarationStatement.typeToken.text.replace(/^dev_/, "");
+        const typeName = declarationStatement.typeToken.text.replace(/^def_/, "");
         const name = declarationStatement.name.text;
         const type = this.typeManager.findOrNull(typeName);
 
         // Notify invalid type.
         if (!type) {
             declarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
-        } else if(!type.options.allowDeclaration) {
+        } else if(type.options && !type.options.allowDeclaration) {
             declarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
         }
 
@@ -353,10 +353,8 @@ export class TypeChecking extends AstVisitor<void> {
             // Type hint that we want whatever the declaration type is then visit.
             initializer.typeHint = symbol.type;
             this.visitNodeOrNull(initializer);
-
-            this.checkTypeMatch(initializer, symbol.type, initializer.type);
+            this.checkTypeMatch(initializer, symbol.type, initializer.type ?? MetaType.Error);
         }
-
         declarationStatement.symbol = symbol;
     }
 
@@ -368,24 +366,29 @@ export class TypeChecking extends AstVisitor<void> {
         // Notify invalid type.
         if (!type) {
             arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeName);
-        } else if (!type.options.allowDeclaration) {
+        } else if (type.options && !type.options.allowDeclaration) {
             arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_DECLARATION_INVALID_TYPE, type.representation);
-        } else if (!type.options.allowArray) {
+        } else if (type.options && !type.options.allowArray) {
             arrayDeclarationStatement.typeToken.reportError(this.diagnostics, DiagnosticMessage.LOCAL_ARRAY_INVALID_TYPE, type.representation);
         }
 
-        // Convert type into an array of type if type exists, otherwise give it error type.
-        type = type != null ? new ArrayType(type) : MetaType.Error;
+        if (type) {
+            // Wrap in an array type when valid.
+            type = new ArrayType(type);
+        } else {
+            // Use error type when the base type is invalid.
+            type = MetaType.Error;
+        }
 
         // Visit the initializer if it exists to resolve references in it.
         const initializer = arrayDeclarationStatement.initializer;
         initializer.typeHint = PrimitiveType.INT;
         this.visitNodeOrNull(initializer);
-        this.checkTypeMatch(initializer, PrimitiveType.INT, initializer.type);
+        this.checkTypeMatch(initializer, PrimitiveType.INT, initializer.type ?? MetaType.Error);
 
         // Attempt to insert the local variable into the symbol table and display error if failed to insert.
         const symbol = new LocalVariableSymbol(name, type);
-        const inserted = this.table.insert(SymbolType.localVariable(), new LocalVariableSymbol(name, type));
+        const inserted = this.table.insert(SymbolType.localVariable(), symbol);
         if (!inserted) {
             arrayDeclarationStatement.name.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_LOCAL_REDECLARATION, name);
         }
@@ -400,8 +403,8 @@ export class TypeChecking extends AstVisitor<void> {
         this.visitNodes(vars);
 
         // Store the lhs types to help with the type hinting.
-        const leftTypes = vars.map(v => v.type);
-        const rightTypes = this.typeHintExpressionList(leftTypes, assignmentStatement.expressions);
+        const leftTypes = vars.map(v => this.getSafeType(v));
+        const rightTypes = this.typeHintExpressionList(leftTypes, assignmentStatement.expressions).map(t => t ?? MetaType.Error);
 
         // Convert types to [TupleType] if necessary for easy comparison.
         const leftType = TupleType.fromList(leftTypes);
@@ -458,7 +461,7 @@ export class TypeChecking extends AstVisitor<void> {
      * Verified the binary expression is a valid condition operation. 
      */
     private checkBinaryConditionOperation(left: Expression, operator: Token, right: Expression): boolean {
-        // Some operators expect a specific type on bith sides, specify those type(s) here.
+        // Some operators expect a specific type on both sides, specify those type(s) here.
         let allowedTypes: Type[] | null;
 
         switch (operator.text) {
@@ -485,8 +488,8 @@ export class TypeChecking extends AstVisitor<void> {
             right.typeHint = allowedTypes[0];
         } else {
             // Assign the type hints using the opposite side if it isn't already assigned.
-            left.typeHint = left.typeHint ?? right.getNullableType();
-            right.typeHint = right.typeHint ?? left.getNullableType();
+            left.typeHint = left.typeHint ?? (right.type ?? null);
+            right.typeHint = right.typeHint ?? (left.type ?? null);
         }
 
         /**
@@ -499,40 +502,52 @@ export class TypeChecking extends AstVisitor<void> {
         right.typeHint = right.typeHint ?? left.type;
         this.visitNodeOrNull(right);
 
+        // Ensure both types are set, otherwise report error and return false.
+        if (left.type == null || right.type == null) {
+            operator.reportError(
+                this.diagnostics,
+                DiagnosticMessage.BINOP_INVALID_TYPES,
+                operator.text,
+                left.type ? left.type.representation : "<null>",
+                right.type ? right.type.representation : "<null>"
+            );
+            return false;
+        }
+
         // Verify the left and right type only return 1 type that is not 'unit'.
-        if (left.getType() instanceof TupleType || right.getType() instanceof TupleType) {
-            if (left.getType() instanceof TupleType) {
+        if (left.type instanceof TupleType || right.type instanceof TupleType) {
+            if (left.type instanceof TupleType) {
                 left.reportError(this.diagnostics, DiagnosticMessage.BINOP_TUPLE_TYPE, "Left", left.type.representation);
             }
-            if (right.getType() instanceof TupleType) {
+            if (right.type instanceof TupleType) {
                 right.reportError(this.diagnostics, DiagnosticMessage.BINOP_TUPLE_TYPE, "Right", right.type.representation);
             }
             return false;
-        } else if (left.getType() == MetaType.Unit || right.getType() == MetaType.Unit) {
+        } else if (left.type == MetaType.Unit || right.type == MetaType.Unit) {
             operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
             return false;
         }
 
-        // Handle operator specific required types, this applies toa ll except '!' and '='.
+        // Handle operator specific required types, this applies to all except '!' and '='.
         if (allowedTypes != null) {
-            if (!this.checkTypeMatchAny(left, allowedTypes, left.getType()) || !this.checkTypeMatchAny(right, allowedTypes, right.getType())) {
-                operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+            if (!this.checkTypeMatchAny(left, allowedTypes, left.type) || !this.checkTypeMatchAny(right, allowedTypes, right.type)) {
+                operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
                 return false;
             }
         }
 
         // Handle equality operator, which allows any type on either side as long as they match.
-        if (!this.checkTypeMatch(left, left.getType(), right.getType(), false)) {
-            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+        if (!this.checkTypeMatch(left, left.type, right.type, false)) {
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
             return false;
-        } else if (left.getType() == PrimitiveType.STRING && right.getType() == PrimitiveType.STRING) {
-            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.getType().representation, right.getType().representation);
+        } else if (left.type == PrimitiveType.STRING && right.type == PrimitiveType.STRING) {
+            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
             return false;
         }
-        
+
         // Other cases are true.
         return true;
-    } 
+    }
 
     override visitArithmeticExpression(arithmeticExpression: ArithmeticExpression): void {
         const left = arithmeticExpression.left;
@@ -552,17 +567,24 @@ export class TypeChecking extends AstVisitor<void> {
 
         // Verify if both sides are 'int' or 'long' and are of the same type.
         if (
-            !this.checkTypeMatchAny(left, TypeChecking.ALLOWED_ARITHMETIC_TYPES, left.type) ||
-            !this.checkTypeMatchAny(left, TypeChecking.ALLOWED_ARITHMETIC_TYPES, right.type) ||
-            !this.checkTypeMatch(left, expectedType, left.type, false) ||
-            !this.checkTypeMatch(right, expectedType, right.type, false)
+            left.type == null || right.type == null ||
+            !this.checkTypeMatchAny(left, TypeChecking.ALLOWED_ARITHMETIC_TYPES, left.type ?? MetaType.Error) ||
+            !this.checkTypeMatchAny(left, TypeChecking.ALLOWED_ARITHMETIC_TYPES, right.type ?? MetaType.Error) ||
+            !this.checkTypeMatch(left, expectedType, left.type ?? MetaType.Error, false) ||
+            !this.checkTypeMatch(right, expectedType, right.type ?? MetaType.Error, false)
         ) {
-            operator.reportError(this.diagnostics, DiagnosticMessage.BINOP_INVALID_TYPES, operator.text, left.type.representation, right.type.representation);
+            operator.reportError(
+                this.diagnostics,
+                DiagnosticMessage.BINOP_INVALID_TYPES,
+                operator.text,
+                left.type ? left.type.representation : "<null>",
+                right.type ? right.type.representation : "<null>"
+            );
             arithmeticExpression.type = MetaType.Error;
             return;
         }
 
-        arithmeticExpression.type = MetaType.Error;
+        arithmeticExpression.type = expectedType;
     }
 
     override visitCalcExpression(calcExpression: CalcExpression): void {
@@ -574,8 +596,8 @@ export class TypeChecking extends AstVisitor<void> {
         this.visitNodeOrNull(innerExpression);
 
         // Verify type is an 'int'.
-        if (!this.checkTypeMatchAny(innerExpression, TypeChecking.ALLOWED_ARITHMETIC_TYPES, innerExpression.type)) {
-            innerExpression.reportError(this.diagnostics, DiagnosticMessage.ARITHMETIC_INVALID_TYPE, innerExpression.type.representation);
+        if (innerExpression.type == null || !this.checkTypeMatchAny(innerExpression, TypeChecking.ALLOWED_ARITHMETIC_TYPES, innerExpression.type ?? MetaType.Error)) {
+            innerExpression.reportError(this.diagnostics, DiagnosticMessage.ARITHMETIC_INVALID_TYPE, innerExpression.type ? innerExpression.type.representation : "<null>");
             calcExpression.type = MetaType.Error;
         } else {
             calcExpression.type = innerExpression.type;
@@ -594,6 +616,11 @@ export class TypeChecking extends AstVisitor<void> {
         this.checkCallExpression(commandCallExpression, this.commandTrigger, DiagnosticMessage.COMMAND_REFERENCE_UNRESOLVED);
     }
 
+    override visitProcCallExpression(procCallExpression: ProcCallExpression): void {
+        // Check the proc call.
+        this.checkCallExpression(procCallExpression, this.procTrigger, DiagnosticMessage.PROC_REFERENCE_UNRESOLVED);
+    }
+
     override visitJumpCallExpression(jumpCallExpression: JumpCallExpression): void {
         if (!this.labelTrigger) {
             jumpCallExpression.reportError(this.diagnostics, "Jump expression not allowed.");
@@ -608,7 +635,7 @@ export class TypeChecking extends AstVisitor<void> {
             return;
         }
 
-        // Check the jump call
+        // Check the jump call.
         this.checkCallExpression(jumpCallExpression, this.labelTrigger, DiagnosticMessage.JUMP_REFERENCE_UNRESOLVED);
     }
 
@@ -711,7 +738,7 @@ export class TypeChecking extends AstVisitor<void> {
         for (const expr of clientScriptExpression.transmitList) {
             expr.typeHint = transmitListType;
             this.visitNodeOrNull(expr);
-            this.checkTypeMatch(expr, transmitListType, expr.type);
+            this.checkTypeMatch(expr, transmitListType, expr.type ?? MetaType.Error);
         }
     }
 
@@ -795,7 +822,7 @@ export class TypeChecking extends AstVisitor<void> {
         if ((symbol.type instanceof ArrayType) && indexExpression != null) {
             // Visit the index to set the type of any references.
             this.visitNodeOrNull(indexExpression);
-            this.checkTypeMatch(indexExpression, PrimitiveType.INT, indexExpression.type);
+            this.checkTypeMatch(indexExpression, PrimitiveType.INT, indexExpression.type ?? MetaType.Error);
         }
 
         localVariableExpression.reference = symbol;
@@ -871,7 +898,7 @@ export class TypeChecking extends AstVisitor<void> {
             
             const parsedExpression: Expression | null = stringExpected
                 ? new StringLiteral(
-                    new NodeSourceLocation(name, line - 1, column - 1),
+                    { name, line: line - 1, column: column - 1, endLine: line - 1, endColumn: column },
                     symbol.value
                 )
                 : ScriptParser.invokeParser(
@@ -1015,7 +1042,7 @@ export class TypeChecking extends AstVisitor<void> {
             expression.accept(this);
 
             // Check that the type matches string.
-            this.checkTypeMatch(expression, PrimitiveType.STRING, expression.type);
+            this.checkTypeMatch(expression, PrimitiveType.STRING, expression.type ?? MetaType.Error);
         }
     }
 
@@ -1029,17 +1056,14 @@ export class TypeChecking extends AstVisitor<void> {
         }
 
         // Error is reported inside 'resolveSymbol'.
-        const symbol = this.resolveSymbol(identifier, name, hint);
+        const symbol = this.resolveSymbol(identifier, name, hint ?? undefined);
         if (!symbol) return;
 
         if (symbol instanceof ScriptSymbol && symbol.trigger === this.commandTrigger && symbol.parameters !== MetaType.Unit) {
             identifier.reportError(this.diagnostics, DiagnosticMessage.GENERIC_TYPE_MISMATCH, "<unit>", symbol.parameters.representation);
         }
 
-        // TODO: This might need some extra fallback handling.
-        if (symbol instanceof BasicSymbol) {
-            identifier.reference = symbol;
-        }
+        identifier.reference = symbol;
     }
 
     private resolveSymbol(node: Expression, name: string, hint?: Type): RuneScriptSymbol | null {
@@ -1143,14 +1167,14 @@ export class TypeChecking extends AstVisitor<void> {
         let typeCounter = 0;
 
         for (const expr of expressions) {
-            // SEt the type hint if we haven't exchausted the expected types.
+            // Set the type hint if we haven't exhausted the expected types.
             expr.typeHint = typeCounter < expectedTypes.length ? expectedTypes[typeCounter]: null;
 
-            // Visit the expresson (evaluates its type).
+            // Visit the expression (evaluates its type).
             expr.accept(this);
 
             // Add the evaluated type.
-            actualTypes.push(expr.type);
+            actualTypes.push(this.getSafeType(expr));
 
             // Increment the counter for type hinting.
             if (expr.type instanceof TupleType) {
@@ -1236,6 +1260,14 @@ export class TypeChecking extends AstVisitor<void> {
         for (const n of nodes) {
             this.visitNodeOrNull(n);
         }
+    }
+
+    /**
+     * Returns the type of an expression, or MetaType.Error if missing/null.
+     * Matches Kotlin's getTypeOrError().
+     */
+    private getSafeType(expr: Expression | null | undefined): Type {
+        return (expr && expr.type) ? expr.type : MetaType.Error;
     }
 
     /**

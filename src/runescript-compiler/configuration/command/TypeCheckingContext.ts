@@ -155,10 +155,10 @@ export class TypeCheckingContext {
             if (!arg.getNullableType()) {
                 this.visitExpression(arg);
             }
-            argumentTypes.push(arg.type!);
+            argumentTypes.push(arg.type ?? MetaType.Error);
         }
 
-        const actual = TupleType.fromList(argumentTypes);
+        const actual = TupleType.fromList(argumentTypes.map(t => t ?? MetaType.Error));
         return this.typeChecker.checkTypeMatch(this.expression, expected, actual, reportError);
     }
 
@@ -168,7 +168,7 @@ export class TypeCheckingContext {
      * @see TupleType.fromList
      */
     public collectTypes(...expressions: Array<Expression | null | undefined>): Type {
-        return TupleType.fromList(expressions.filter((e): e is Expression => !!e).map(e => e.getNullableType()!));
+        return TupleType.fromList(expressions.filter((e): e is Expression => !!e).map(e => e.getNullableType() ?? MetaType.Error));
     }
 
     /**

@@ -29,21 +29,26 @@ export class SymbolMapper implements IdProvider {
 
     putSymbol(id: number, symbol: RuneScriptSymbol): void {
         if (this.symbols.has(symbol)) {
-            throw new Error(`Duplicate symbol: ${symbol}.`);
+            if ((symbol as any).context?.diagnostics) {
+                (symbol as any).context.diagnostics.report(`Duplicate symbol: ${symbol}.`);
+            }
+            return;
         }
         this.symbols.set(symbol, id);
     }
 
     putCommand(id: number, name: string): void {
         if (this.commands.has(name)) {
-            throw new Error(`Duplicate command: ${name}.`);
+            // No context for diagnostics, so just return
+            return;
         }
         this.commands.set(name, id);
     }
 
     putScript(id: number, name: string): void {
         if (this.scripts.has(name)) {
-            throw new Error(`Duplicate script: ${name}.`);
+            // No context for diagnostics, so just return
+            return;
         }
         this.scripts.set(name, id);
     }
@@ -55,14 +60,20 @@ export class SymbolMapper implements IdProvider {
                 const name = symbol.name.substring(symbol.name.indexOf('.') + 1);
                 const id = this.commands.get(name);
                 if (id === undefined) {
-                    throw new Error(`Unable to find id for '${symbol}'.`);
+                    if ((symbol as any).context?.diagnostics) {
+                        (symbol as any).context.diagnostics.report(`Unable to find id for '${symbol}'.`);
+                    }
+                    return -1;
                 }
                 return id;
             } else {
                 const name = `[${symbol.trigger.identifier},${symbol.name}]`;
                 const id = this.scripts.get(name);
                 if (id === undefined) {
-                    throw new Error(`Unable to find id for '${symbol}'.`);
+                    if ((symbol as any).context?.diagnostics) {
+                        (symbol as any).context.diagnostics.report(`Unable to find id for '${symbol}'.`);
+                    }
+                    return -1;
                 }
                 return id;
             }

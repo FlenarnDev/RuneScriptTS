@@ -6,6 +6,7 @@ import { CommandCallExpression } from '../../runescipt-parser/ast/expr/call/Comm
 import { JumpCallExpression } from '../../runescipt-parser/ast/expr/call/JumpCallExpression';
 import { ProcCallExpression } from '../../runescipt-parser/ast/expr/call/ProcCallExpression';
 import { ClientScriptExpression } from '../../runescipt-parser/ast/expr/ClientScriptExpression';
+import { ConditionExpression } from '../../runescipt-parser/ast/expr/ConditionExpression';
 import { Expression } from '../../runescipt-parser/ast/expr/Expression';
 import { Identifier } from '../../runescipt-parser/ast/expr/Identifier';
 import { JoinedStringExpression } from '../../runescipt-parser/ast/expr/JoinedStringExpression';
@@ -275,8 +276,8 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     private generateCondition(condition: Expression, block: Block, branchTrue: Label, branchFalse: Label) {
-        if (condition instanceof BinaryExpression) {
-            const isLogical = condition.operator.text in CodeGenerator.LOGICAL_OPERATORS;
+        if (condition instanceof BinaryExpression || condition instanceof ConditionExpression) {
+            const isLogical = (CodeGenerator.LOGICAL_OPERATORS as readonly string[]).includes(condition.operator.text);
             if (!isLogical) {
                 // Assume if we get to this point that the left and right types match and are valid.
                 const baseType = condition.left.type.baseType;
@@ -286,8 +287,10 @@ export class CodeGenerator extends AstVisitor<void> {
                 }
 
                 // Lookup the proper branching instrunction based on the base type used.
-                const branchOpcodes = CodeGenerator.BRANCH_MAPPINGS[baseType] ?? new Error(`No mappings for BaseType: ${baseType}`);
-                const branchOpcode = branchOpcodes[condition.operator.text] ?? new Error(`No mappings for operator: ${condition.operator.text}`);
+                const branchOpcodes = CodeGenerator.BRANCH_MAPPINGS.get(baseType);
+                if (!branchOpcodes) throw new Error(`No mappings for BaseType: ${baseType}`);
+                const branchOpcode = branchOpcodes.get(condition.operator.text);
+                if (!branchOpcode) throw new Error(`No mappings for operator: ${condition.operator.text}`);
 
                 // Visit the two sides
                 this.visitNodeOrNull(condition.left);
@@ -560,7 +563,7 @@ export class CodeGenerator extends AstVisitor<void> {
             }
         })();
 
-        const opcode = opcodes[operator];
+        const opcode = opcodes.get(operator);
         if (!opcode) throw new Error(`No mapping for operator: ${operator}.`);
 
         // Visit left side
@@ -575,7 +578,7 @@ export class CodeGenerator extends AstVisitor<void> {
 
     override visitCalcExpression(calcExpression: CalcExpression): void {
         this.lineInstruction(calcExpression);
-        this.visitNodeOrNull(calcExpression);
+        this.visitNodeOrNull(calcExpression.expression);
     }
 
     override visitCommandCallExpression(commandCallExpression: CommandCallExpression): void {
@@ -596,11 +599,18 @@ export class CodeGenerator extends AstVisitor<void> {
     }
 
     private emitDynamicCommand(name: string, expression: Expression): boolean {
-        const dynamicCommand = this.dynamicCommands[name];
+        const dynamicCommand = this.dynamicCommands.get(name);
         if (!dynamicCommand) return false;
 
         const context = new CodeGeneratorContext(this, this.rootTable, expression, this.diagnostics);
-        dynamicCommand.generateCode.call(context);
+
+        if (dynamicCommand.generateCode) {
+            dynamicCommand.generateCode(context);
+        } else {
+            // Fallback to default behaviour: emit arguments then command
+            context.visitNodes(context.arguments);
+            context.command();
+        }
 
         return true;
     }
@@ -696,7 +706,7 @@ export class CodeGenerator extends AstVisitor<void> {
             return;
         }
 
-        this.instruction(Opcode.PushConstantInt, 1, nullLiteral.source);
+        this.instruction(Opcode.PushConstantInt, -1, nullLiteral.source);
 
         if (nullLiteral.getType() instanceof MetaType.Hook) {
             /**
@@ -771,8 +781,6 @@ export class CodeGenerator extends AstVisitor<void> {
             this.instruction(Opcode.PushConstantSymbol, reference, identifier.source);
         }
     }
-
-    
 
     /**
      * Shortcut to [Node.accept] for nullable nodes.

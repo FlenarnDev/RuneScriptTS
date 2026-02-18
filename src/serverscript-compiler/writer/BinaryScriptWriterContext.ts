@@ -65,7 +65,7 @@ export class BinaryScriptWriterContext extends BaseScriptWriterContext {
         this.instructionOffset += 2;
 
         if (opcode.largeOperand) {
-            this.instructionBuffer.writeInt32BE(operand, this.instructionOffset);
+            this.instructionBuffer.writeInt32BE(operand | 0, this.instructionOffset);
             this.instructionOffset += 4;
         } else {
             this.instructionBuffer.writeUInt8(operand, this.instructionOffset);
@@ -174,7 +174,13 @@ export class BinaryScriptWriterContext extends BaseScriptWriterContext {
         size += this.script.fullName.length + 1;
         size += this.script.sourceName.length + 1;
         size += 4;
-        size += 1;
+        // Account for debugproc parameter type codes
+        if (this.script.trigger === ServerTriggerType.DEBUGPROC) {
+            const params = TupleType.toList(this.script.symbol.parameters);
+            size += 1 + params.length; // count byte + type code bytes
+        } else {
+            size += 1; // just the 0 byte
+        }
         size += this.lineNumberTable.size * 8 + 2;
         size += this.instructionOffset;
         size += 4;
@@ -191,7 +197,7 @@ export class BinaryScriptWriterContext extends BaseScriptWriterContext {
 
     private writeString(buf: Buffer, text: string, offset: number): number {
         for (let i = 0; i < text.length; i++) {
-            buf.writeUInt8(text.charCodeAt(i), offset++);
+            buf.writeUInt8(text.charCodeAt(i) & 0xFF, offset++);
         }
         buf.writeUInt8(0, offset++);
         return offset;

@@ -69,17 +69,20 @@ export class CodeGeneratorContext {
      * ```
      */
     command(): void {
-        /**
-         * The symbol is verified to not be null in CodeGenerator before calling user
-         * code generation code which makes this safe, but we'll make the compiler happy. 
-         */
-        const symbol = (() => {
-        if (this.expression instanceof CommandCallExpression) this.expression.symbol;
-        if (this.expression instanceof Identifier) return this.expression.reference;
-        })() as ScriptSymbol | null;
+        const symbol: ScriptSymbol | null = (() => {
+            if (this.expression instanceof CommandCallExpression) {
+                return this.expression.symbol as ScriptSymbol | null;
+            }
+            if (this.expression instanceof Identifier) {
+                return this.expression.reference as ScriptSymbol | null;
+            }
+            return null;
+        })();
 
         this.lineInstruction(this.expression);
-        if (!symbol) throw new Error("Symbol cannot be null for command generation");
+        if (!symbol) {
+            throw new Error("Symbol cannot be null for command generation.");
+        }
         this.instruction(Opcode.Command, symbol, this.expression.source);
     }
 
@@ -112,5 +115,4 @@ export class CodeGeneratorContext {
     visitNodes(nodes: Node[] | null | undefined): void {
         if (!nodes) return;
         this.codeGenerator.visitNodes(nodes);
-    }
-}
+    }}

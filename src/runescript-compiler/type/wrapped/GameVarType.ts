@@ -10,9 +10,9 @@ export abstract class GameVarType implements WrappedType {
     abstract readonly inner: Type;
     abstract readonly representation: string;
 
-    readonly code: string | null = null;
-    readonly baseType: BaseVarType | null = null;
-    readonly defaultValue: unknown | null = null;
+    readonly code: string | undefined = undefined;
+    readonly baseType: BaseVarType = BaseVarType.INTEGER;
+    readonly defaultValue: unknown = -1;
 
     readonly options: TypeOptions = new MutableOptionsType({
         allowArray: false,

@@ -57,7 +57,7 @@ export class MetaType implements MainType {
      */
     static Type = class extends MetaType implements WrappedType {
         readonly inner: MainType;
-        readonly representation: string;
+        declare readonly representation: string;
 
         constructor(inner: MainType) {
             super("type");
@@ -71,7 +71,7 @@ export class MetaType implements MainType {
      * script trigger type, parameter type(s), and return type(s).
      */
     static Script = class extends MetaType {
-        readonly representation: string;
+        declare readonly representation: string;
         readonly trigger: TriggerType;
         readonly parameterType: MainType;
         readonly returnType: MainType;
@@ -92,7 +92,7 @@ export class MetaType implements MainType {
      */
     static Hook = class extends MetaType{
         readonly transmitListType: MainType;
-        readonly representation: string;
+        declare readonly representation: string;
 
         constructor(transmitListType: MainType) {
             super("hook");

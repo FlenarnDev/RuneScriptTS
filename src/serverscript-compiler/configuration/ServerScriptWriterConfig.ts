@@ -9,5 +9,5 @@ export interface ServerScriptWriterConfig {
  * Configuration for [BinaryFileScriptWriter].
  */
 export interface BinaryFileWriterConfig {
-    outputPath: string;
+    output: string;
 }

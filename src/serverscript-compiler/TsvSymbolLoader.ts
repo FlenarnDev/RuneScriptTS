@@ -46,7 +46,7 @@ export class TsvSymbolLoader extends SymbolLoader {
             const id = Number(split[0]);
             const name = split[1];
 
-            const subTypes = split.length >= 3 ? TupleType.fromList(split[2].split(",").map(typeName => compiler.types.find(typeName))) : MetaType.Unit;
+            const subTypes = split.length >= 3 ? TupleType.fromList(split[2].split(",").map(typeName => compiler.types.find(typeName) ?? MetaType.Error)) : MetaType.Unit;
 
             const type = this.typeSupplier(subTypes);
 

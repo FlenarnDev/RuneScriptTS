@@ -98,8 +98,8 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
             id = BaseScriptWriter.getVariableId(context.script.locals, value);
         } else if (value instanceof BasicSymbol && value.type instanceof MetaType.Type) {
             const type = value.type;
-            if (type.inner.code?.charCodeAt[0] != null) {
-                id = type.inner.code?.charCodeAt[0];
+            if (typeof type.inner.code === 'string' && type.inner.code.length > 0) {
+                id = type.inner.code.charCodeAt(0);
             } else {
                 throw new Error(`Type has chno code: ${type.inner}.`);
             }
@@ -119,7 +119,7 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
         } else if (symbol.type.baseType === BaseVarType.STRING) {
             op = ServerScriptOpcode.PUSH_STRING_LOCAL;
         } else if (symbol.type.baseType === BaseVarType.INTEGER) {
-            op = ServerScriptOpcode.POP_INT_LOCAL;
+            op = ServerScriptOpcode.PUSH_INT_LOCAL;
         } else {
             throw new Error(`Unsupported local variable type: ${symbol.type}.`);
         }
@@ -196,11 +196,12 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
         const id = BaseScriptWriter.getVariableId(context.script.locals, symbol);
 
         const arrayType = symbol.type as ArrayType;
-        if (!arrayType.inner.code.charCodeAt[0]) {
-            throw new Error(`Type has no char code: ${symbol.type}.`);
+        if (typeof arrayType.inner.code !== 'string' || arrayType.inner.code.length === 0) {
+            // Type has no char code - no-op
+            throw new Error(`Type has no char code: ${arrayType.inner}.`);
         }
 
-        const code = arrayType.inner.code.charCodeAt[0];
+        const code = arrayType.inner.code.charCodeAt(0);
         context.instruction(ServerScriptOpcode.DEFINE_ARRAY, (id << 16) | code);
     }
 
@@ -219,7 +220,6 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
                 for (const key of switchCase[1].keys) {
                     context.switchCase(this.findCaseKeyValue(key), relativeJumpLocation);
                 }
-
                 totalKeyCount += switchCase[1].keys.length;
             }
 
@@ -230,11 +230,13 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
     private findCaseKeyValue(key: number | RuneScriptSymbol): number {
         if (typeof key === "number") {
             return key;
-        } else if (key instanceof Symbol) {
-            return this.idProvider.get(key);
-        } else {
-            throw new Error(`Unsupport key type: ${key}.`);
         }
+
+        /**
+         * All non-number keys in switch tables should be RuneScript symbols
+         * that can be resolved through the IdProvider.
+         */ 
+        return this.idProvider.get(key as RuneScriptSymbol);
     }
 
     protected override writeBranch(context: BinaryScriptWriterContext, opcode: Opcode<any>, label: Label): void {
@@ -301,9 +303,8 @@ export abstract class BinaryScriptWriter extends BaseScriptWriter<BinaryScriptWr
     }
 
     protected override writeJump(context: BinaryScriptWriterContext, symbol: ScriptSymbol): void {
-        const op = this.idProvider.get(symbol);
-        const secondary: boolean = symbol.name.startsWith(".");
-        context.instructionRaw(op, secondary ? 1 : 0);
+        const id = this.idProvider.get(symbol);
+        context.instruction(ServerScriptOpcode.JUMP_WITH_PARAMS, id);
     }
 
     protected override writeCommand(context: BinaryScriptWriterContext, symbol: ScriptSymbol): void {

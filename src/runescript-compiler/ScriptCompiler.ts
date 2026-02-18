@@ -11,7 +11,7 @@ import * as path from 'path';
 import { PrimitiveType } from './type/PrimitiveType';
 import { CommandTrigger } from './trigger/CommandTrigger';
 import { MetaType } from './type/MetaType';
-import { WrappedType } from './type/wrapped/WrappedType';
+import { TupleType } from './type/TupleType';
 import { ScriptFile } from '../runescipt-parser/ast/ScriptFile';
 import { Diagnostics } from './diagnostics/Diagnostics';
 import { ParserErrorListener } from './ParserErrorListener';
@@ -87,6 +87,7 @@ export class ScriptCompiler{
 
         // Register core types.
         this.types.registerAll(PrimitiveType);
+        
         this.setupDefaultTypeCheckers();
 
         // Register the command trigger.
@@ -126,12 +127,45 @@ export class ScriptCompiler{
         );
 
         // Checker for [WrappedType] that compares the inner types.
-        this.types.addTypeChecker((left, right) => 
-            left instanceof WrappedType &&
-            right instanceof WrappedType &&
-            left.constructor === right.constructor &&
-            this.types.check(left.inner, right.inner)
-        );
+        // Check for 'inner' property since WrappedType is implemented, not extended
+        this.types.addTypeChecker((left, right) => {
+            const leftHasInner = 'inner' in left && left.inner != null;
+            const rightHasInner = 'inner' in right && right.inner != null;
+            
+            if (!leftHasInner || !rightHasInner) {
+                return false;
+            }
+            
+            if (left.constructor.name !== right.constructor.name) {
+                return false;
+            }
+            
+            // Type assertion: we've verified left.inner and right.inner exist
+            return this.types.check((left as any).inner, (right as any).inner);
+        });
+
+        // Checker for [TupleType] that compares all children.
+        this.types.addTypeChecker((left, right) => {
+            if (!(left instanceof TupleType) || !(right instanceof TupleType)) {
+                return false;
+            }
+            if (left.children.length !== right.children.length) {
+                return false;
+            }
+            for (let i = 0; i < left.children.length; i++) {
+                if (!this.types.check(left.children[i], right.children[i])) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        // Fallback checker: compare types by their string representation.
+        // This handles cases where dynamically created types have the same structure
+        // but are different instances (e.g., TupleTypes created in different contexts).
+        this.types.addTypeChecker((left, right) => {
+            return left.representation === right.representation;
+        });
     }
 
 
@@ -217,6 +251,7 @@ export class ScriptCompiler{
         const diagnostics = new Diagnostics();
         const fileNodes: ScriptFile[] = [];
         let fileCount = 0;
+        const start = performance.now();
 
         for (const sourcePath of this.sourcePaths) {
             this.logger.debug(`Parsing files in '${sourcePath}'.`);
@@ -228,23 +263,19 @@ export class ScriptCompiler{
                 if (!fs.statSync(file).isFile() || path.extname(file) !== `.${ext}`) {
                     continue;
                 }
-                this.logger.debug(`Attempting to parse: ${file}.`);
+                //this.logger.debug(`Attempting to parse: ${file}.`);
 
-                const start = performance.now();
                 const errorListener = new ParserErrorListener(file, diagnostics);
                 const node: ScriptFile | null = ScriptParser.createScriptFile(file, errorListener);
                 if (node) {
                     fileNodes.push(node);
                 }
                 fileCount++;
-
-                const time = (performance.now() - start).toFixed(2);
-                this.logger.debug(`Parsed ${file} in ${time}ms.`);
             }
         }
-
-        this.logger.debug(`Parsed ${fileCount} files.`);
-        this.diagnosticsHandler.handleParse(diagnostics);
+        const time = (performance.now() - start).toFixed(2);
+        this.logger.debug(`Parsed ${fileCount} files in ${time}ms.`);
+        this.diagnosticsHandler.handleParse?.(diagnostics);
 
         return [diagnostics.hasErrors() === false, fileNodes];
     }
@@ -265,7 +296,7 @@ export class ScriptCompiler{
             const fileStart = performance.now();
             file.accept(preTypeChecking);
             const fileTime = (performance.now() - fileStart).toFixed(2);
-            this.logger.debug(`Pre-type checked ${file.source.name} in ${fileTime}ms.`);
+            //this.logger.debug(`Pre-type checked ${file.source.name} in ${fileTime}ms.`);
         }
 
         const preTypeCheckingTime = (performance.now() - preTypeStart).toFixed(2);
@@ -280,14 +311,14 @@ export class ScriptCompiler{
             const fileStart = performance.now();
             file.accept(typeChecking);
             const fileTime = (performance.now() - fileStart).toFixed(2);
-            this.logger.debug(`Type checked ${file.source.name} in ${fileTime}ms.`);
+            //this.logger.debug(`Type checked ${file.source.name} in ${fileTime}ms.`);
         }
 
         const typeCheckingTime = (performance.now() - typeStart).toFixed(2);
         this.logger.debug(`Finished type checking in ${typeCheckingTime}ms.`);
 
         // Call the diagnostics handler.
-        this.diagnosticsHandler.handleTypeChecking(diagnostics);        
+        this.diagnosticsHandler.handleTypeChecking?.(diagnostics);
 
         return !diagnostics.hasErrors();
     }
@@ -312,13 +343,13 @@ export class ScriptCompiler{
             file.accept(codeGen);
             scripts.push(...codeGen.scripts);
             const fileTime = (performance.now() - fileStart).toFixed(2);
-            this.logger.debug(`Generated code for ${file.source.name} in ${fileTime}ms.`);
+            //this.logger.debug(`Generated code for ${file.source.name} in ${fileTime}ms.`);
         }
         const codeGenTime = (performance.now() - codeGenStart).toFixed(2);
         this.logger.debug(`Finished codegen in ${codeGenTime}ms.`);
 
         // Call the diagnostics handler.
-        this.diagnosticsHandler.handleCodeGeneration(diagnostics);
+        this.diagnosticsHandler.handleCodeGeneration?.(diagnostics);
 
         return [diagnostics.hasErrors() === false, scripts];
     }
@@ -339,7 +370,7 @@ export class ScriptCompiler{
         this.logger.debug(`Finished pointer checking in ${pointerCheckTime}ms.`);
 
         // Call the diagnostics handler.
-        this.diagnosticsHandler.handlePointerChecking(diagnostics);
+        this.diagnosticsHandler.handlePointerChecking?.(diagnostics);
 
         return !diagnostics.hasErrors();
     }
@@ -359,9 +390,10 @@ export class ScriptCompiler{
             const scriptWriteTimeStart = performance.now();
             this.scriptWriter.write(script);
             const scriptWriteTime = (performance.now() - scriptWriteTimeStart).toFixed(2);
-            this.logger.debug(`Wrote ${script.fullName} in ${scriptWriteTime}ms.`);
+            //this.logger.debug(`Wrote ${script.fullName} in ${scriptWriteTime}ms.`);
         }
         const scriptWriterTime = (performance.now() - scriptWriterStart).toFixed(2);
+        this.logger.debug(`Finished script writing in ${scriptWriterTime}ms.`);
     }
 
     /**

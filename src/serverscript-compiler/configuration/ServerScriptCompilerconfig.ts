@@ -1,3 +1,5 @@
+import { ServerScriptWriterConfig } from './ServerScriptWriterConfig';
+
 /**
  * Main compiler configuration holder.
  */
@@ -13,7 +15,7 @@ export class ServerScriptCompilerConfig {
         symbolPaths = ['symbols/'],
         excludePaths = [],
         checkPointers = true,
-        writers = new ServerScriptWriterConfig(),
+        writers = {},
     }: Partial<ServerScriptCompilerConfig> = {}) {
         this.sourcePaths = sourcePaths;
         this.symbolPaths = symbolPaths;
