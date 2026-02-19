@@ -384,9 +384,9 @@ export class AstBuilder extends RuneScriptParserVisitor<Node> {
         return {
             name: this.source,
             line: start.line + this.lineOffset,
-            column: start.column + startColumnOffset,
+            column: start.column + 1 + startColumnOffset,
             endLine: stop.line + this.lineOffset,
-            endColumn: stop.column + endColumnOffset + textLength,
+            endColumn: stop.column + 1 + endColumnOffset + textLength,
         };
     }
 
