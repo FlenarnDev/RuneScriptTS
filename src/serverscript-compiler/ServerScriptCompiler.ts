@@ -149,8 +149,10 @@ export class ServerScriptCompiler extends ScriptCompiler {
 
         // 2013 RS / 2018 OSRS
         this.types.register('dbcolumn', new DbColumnType(MetaType.Any));
-        this.addDynamicCommandHandler('db_find', new DbFindCommandHandler(true));
-        this.addDynamicCommandHandler('db_find_refine', new DbFindCommandHandler(true));
+        this.addDynamicCommandHandler('db_find', new DbFindCommandHandler(false));
+        this.addDynamicCommandHandler('db_find_refine', new DbFindCommandHandler(false));
+        this.addDynamicCommandHandler('db_find_with_count', new DbFindCommandHandler(true));
+        this.addDynamicCommandHandler('db_find_refine_with_count', new DbFindCommandHandler(true));
         this.addDynamicCommandHandler('db_getfield', new DbGetFieldCommandHandler());
         this.addSymLoaderWithSupplier('dbcolumn', sub => new DbColumnType(sub));
         this.addSymLoader('dbrow', ScriptVarType.DBROW);
