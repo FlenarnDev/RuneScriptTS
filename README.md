@@ -33,6 +33,21 @@ If that doesn't work for your use case, there is a config object you can pass to
 
 See [LostCityRS/Server](https://github.com/LostCityRS/Server) for a working example of everything if you aren't using that already.
 
+### Building RuneScriptTS
+
+After cloning:
+```sh
+bun i
+bun run antlr
+```
+
+Testing:  
+You can test changes without publishing by copying `dist/runescript.js` into your consumer's node_modules folder
+```sh
+bun run build
+cp dist/runescript.* ../node_modules/@lostcityrs/runescript/dist/
+```
+
 ### History
 
 Originally a fork of [Neptune](https://github.com/neptune-ps/neptune)'s script compiler.  
