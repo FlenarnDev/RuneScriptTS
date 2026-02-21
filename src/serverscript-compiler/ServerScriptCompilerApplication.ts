@@ -12,18 +12,18 @@ import { Js5PackScriptWriter } from './writer/Js5PackScriptWriter';
 
 
 export function CompileServerScript(config?: {
-    sourcePaths: string[] | undefined,
-    symbolPaths: string[] | undefined,
-    excludePaths: string[] | undefined,
-    checkPointers: boolean | undefined;
-    writer: {
-        jag: {
-            output: string
-        } | undefined,
-        js5: {
-            output: string
-        } | undefined
-    }
+    sourcePaths?: string[];
+    symbolPaths?: string[];
+    excludePaths?: string[];
+    checkPointers?: boolean;
+    writer?: {
+        jag?: {
+            output: string;
+        };
+        js5?: {
+            output: string;
+        };
+    };
 }) {
     // default config
     let sourcePaths: string[] = ['../content/scripts'];

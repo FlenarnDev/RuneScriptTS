@@ -28,7 +28,8 @@ The compiler expects a couple things to be in place.
 There must be a sym file for every config type you reference in your scripts.
 
 By default it will read scripts from `../content/scripts` and symbols from `./data/symbols`.  
-After it runs, compiled output will be placed in `./data/pack/server`.
+After it runs, compiled output will be placed in `./data/pack/server`.  
+If that doesn't work for your use case, there is a config object you can pass to CompileServerScript. There is a .d.ts file included that describes the structure.
 
 See [LostCityRS/Server](https://github.com/LostCityRS/Server) for a working example of everything if you aren't using that already.
 
