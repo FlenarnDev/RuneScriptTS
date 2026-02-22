@@ -1,6 +1,7 @@
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';
 import { MutableOptionsType } from '#/runescript-compiler/type/TypeOptions.js';
+
 import { ArrayType } from '#/runescript-compiler/type/wrapped/ArrayType.js';
 
 export type TypeChecker = (left: Type, right: Type) => boolean;

@@ -1,6 +1,9 @@
-import { SymbolLoader } from '#/runescript-compiler/configuration/SymbolLoader.js';
 import { ScriptCompiler } from '#/runescript-compiler/ScriptCompiler.js';
+
+import { SymbolLoader } from '#/runescript-compiler/configuration/SymbolLoader.js';
+
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { TupleType } from '#/runescript-compiler/type/TupleType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';

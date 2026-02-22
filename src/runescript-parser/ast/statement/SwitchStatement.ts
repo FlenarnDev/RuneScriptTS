@@ -1,9 +1,12 @@
 import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { Token } from '#/runescript-parser/ast/Token.js';
+
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+
 import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 import { SwitchCase } from '#/runescript-parser/ast/statement/SwitchCase.js';
 

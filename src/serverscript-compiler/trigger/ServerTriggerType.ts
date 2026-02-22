@@ -1,9 +1,10 @@
 import { PointerType } from '#/runescript-compiler/pointer/PointerType.js';
+
 import { SubjectMode } from '#/runescript-compiler/trigger/SubjectMode.js';
 import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
 import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';
-
 import { ScriptVarType } from '#/serverscript-compiler/type/ScriptVarType.js';
 
 /**

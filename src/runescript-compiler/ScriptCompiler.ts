@@ -1,27 +1,41 @@
 import fs from 'fs';
 import path from 'path';
 
-import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
-import { SymbolLoader } from '#/runescript-compiler/configuration/SymbolLoader.js';
-import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
-import { TriggerManager } from '#/runescript-compiler/trigger/TriggerManager.js';
-import { TypeManager } from '#/runescript-compiler/type/TypeManager.js';
-import { DiagnosticsHandler, BaseDiagnosticsHandler } from '#/runescript-compiler/diagnostics/DiagnosticsHandler.js';
-import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
-import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
-import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
-import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
-import { MetaType } from '#/runescript-compiler/type/MetaType.js';
-import { TupleType } from '#/runescript-compiler/type/TupleType.js';
-import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
-import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
 import { ParserErrorListener } from '#/runescript-compiler/ParserErrorListener.js';
-import { ScriptParser } from '#/runescript-parser/parser/ScriptParser.js';
+
+import { CodeGenerator } from '#/runescript-compiler/codegen/CodeGenerator.js';
+
+import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
+
+import { PointerChecker } from '#/runescript-compiler/codegen/script/config/PointerChecker.js';
+
+import { SymbolLoader } from '#/runescript-compiler/configuration/SymbolLoader.js';
+
+import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
+
+import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
+import { BaseDiagnosticsHandler, DiagnosticsHandler } from '#/runescript-compiler/diagnostics/DiagnosticsHandler.js';
+
+import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
+
 import { PreTypeChecking } from '#/runescript-compiler/semantics/PreTypeChecking.js';
 import { TypeChecking } from '#/runescript-compiler/semantics/TypeChecking.js';
-import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
-import { CodeGenerator } from '#/runescript-compiler/codegen/CodeGenerator.js';
-import { PointerChecker } from '#/runescript-compiler/codegen/script/config/PointerChecker.js';
+
+import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
+import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
+import { TriggerManager } from '#/runescript-compiler/trigger/TriggerManager.js';
+
+import { MetaType } from '#/runescript-compiler/type/MetaType.js';
+import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
+import { TupleType } from '#/runescript-compiler/type/TupleType.js';
+import { TypeManager } from '#/runescript-compiler/type/TypeManager.js';
+
+import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
+
+import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
+
+import { ScriptParser } from '#/runescript-parser/parser/ScriptParser.js';
 
 /**
  * An entry point for compiling scripts.

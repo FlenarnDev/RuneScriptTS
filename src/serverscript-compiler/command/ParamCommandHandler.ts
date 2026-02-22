@@ -1,5 +1,6 @@
 import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
 import { TypeCheckingContext } from '#/runescript-compiler/configuration/command/TypeCheckingContext.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { TupleType } from '#/runescript-compiler/type/TupleType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';

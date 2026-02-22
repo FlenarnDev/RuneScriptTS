@@ -1,6 +1,8 @@
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
+
 import { IdProvider } from '#/runescript-compiler/writer/BaseScriptWriter.js';
 
 /**

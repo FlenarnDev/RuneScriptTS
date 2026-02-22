@@ -1,18 +1,22 @@
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
+import { Node } from '#/runescript-parser/ast/Node.js';
+
 import { BinaryExpression } from '#/runescript-parser/ast/expr/BinaryExpression.js';
 import { CalcExpression } from '#/runescript-parser/ast/expr/CalcExpression.js';
-import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
 import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 import { JoinedStringExpression } from '#/runescript-parser/ast/expr/JoinedStringExpression.js';
+import { BasicStringPart, ExpressionStringPart, StringPart } from '#/runescript-parser/ast/expr/StringPart.js';
+
+import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
+
 import { CharacterLiteral } from '#/runescript-parser/ast/expr/literal/CharacterLiteral.js';
 import { Literal } from '#/runescript-parser/ast/expr/literal/Literal.js';
 import { NullLiteral } from '#/runescript-parser/ast/expr/literal/NullLiteral.js';
 import { StringLiteral } from '#/runescript-parser/ast/expr/literal/StringLiteral.js';
-import { StringPart, BasicStringPart, ExpressionStringPart } from '#/runescript-parser/ast/expr/StringPart.js';
+
 import { ConstantVariableExpression } from '#/runescript-parser/ast/expr/variable/ConstantVariableExpression.js';
 import { GameVariableExpression } from '#/runescript-parser/ast/expr/variable/GameVariableExpression.js';
 import { LocalVariableExpression } from '#/runescript-parser/ast/expr/variable/LocalVariableExpression.js';
-import { Node } from '#/runescript-parser/ast/Node.js';
 
 export class ExpressionGenerator extends AstVisitor<string> {
     override visitBinaryExpression(expr: BinaryExpression): string {

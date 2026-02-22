@@ -1,6 +1,8 @@
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
 import { RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
 
 /**

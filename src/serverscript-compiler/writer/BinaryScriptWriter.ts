@@ -1,20 +1,28 @@
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { Block } from '#/runescript-compiler/codegen/script/Block.js';
 import { Label } from '#/runescript-compiler/codegen/script/Label.js';
 import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
 import { SwitchTable } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol, LocalVariableSymbol, RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { SubjectMode } from '#/runescript-compiler/trigger/SubjectMode.js';
+
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
+
 import { ArrayType } from '#/runescript-compiler/type/wrapped/ArrayType.js';
 import { VarBitType, VarNpcType, VarPlayerType, VarSharedType } from '#/runescript-compiler/type/wrapped/GameVarType.js';
+
 import { BaseScriptWriter, IdProvider } from '#/runescript-compiler/writer/BaseScriptWriter.js';
 
 import { ServerScriptOpcode } from '#/serverscript-compiler/ServerScriptOpcode.js';
+
 import { ScriptVarType } from '#/serverscript-compiler/type/ScriptVarType.js';
+
 import { BinaryScriptWriterContext } from '#/serverscript-compiler/writer/BinaryScriptWriterContext.js';
 
 /**

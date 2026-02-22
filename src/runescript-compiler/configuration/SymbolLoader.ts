@@ -1,7 +1,9 @@
 import { ScriptCompiler } from '#/runescript-compiler/ScriptCompiler.js';
+
 import { BasicSymbol, ConstantSymbol } from '#/runescript-compiler/symbol/Symbol.js';
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
 import { SymbolType } from '#/runescript-compiler/symbol/SymbolType.js';
+
 import { Type } from '#/runescript-compiler/type/Type.js';
 
 /**

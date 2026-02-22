@@ -1,9 +1,10 @@
 import { ANTLRErrorListener, RecognitionException, Recognizer, type ATNConfigSet, type BitSet, type DFA, type Parser } from 'antlr4ng';
 
-import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
-import { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { Diagnostic } from '#/runescript-compiler/diagnostics/Diagnostic.js';
+import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
 import { DiagnosticType } from '#/runescript-compiler/diagnostics/DiagnosticType.js';
+
+import { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 
 /**
  * An antlr error listener that adds the error to [Diagnostics] for reporting later.

@@ -1,26 +1,31 @@
-import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { Node } from '#/runescript-parser/ast/Node.js';
-import { Parameter } from '#/runescript-parser/ast/Parameter.js';
-import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
-import { Script } from '#/runescript-parser/ast/Scripts.js';
-import { BlockStatement } from '#/runescript-parser/ast/statement/BlockStatement.js';
-import { SwitchCase } from '#/runescript-parser/ast/statement/SwitchCase.js';
-import { SwitchStatement } from '#/runescript-parser/ast/statement/SwitchStatement.js';
 import { DiagnosticMessage } from '#/runescript-compiler/diagnostics/DiagnosticMessage.js';
 import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
+
 import { ServerScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
 import { SymbolType } from '#/runescript-compiler/symbol/SymbolType.js';
+
 import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
 import { SubjectMode } from '#/runescript-compiler/trigger/SubjectMode.js';
 import { TriggerManager } from '#/runescript-compiler/trigger/TriggerManager.js';
 import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
 import { TupleType } from '#/runescript-compiler/type/TupleType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';
 import { TypeManager } from '#/runescript-compiler/type/TypeManager.js';
+
+import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
+import { Node } from '#/runescript-parser/ast/Node.js';
+import { Parameter } from '#/runescript-parser/ast/Parameter.js';
+import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
+import { Script } from '#/runescript-parser/ast/Scripts.js';
+
+import { BlockStatement } from '#/runescript-parser/ast/statement/BlockStatement.js';
+import { SwitchCase } from '#/runescript-parser/ast/statement/SwitchCase.js';
+import { SwitchStatement } from '#/runescript-parser/ast/statement/SwitchStatement.js';
 
 /**
  * An [AstVisitor] implementation that handles the following.

@@ -1,18 +1,24 @@
-import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
-import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
-import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 import { Diagnostic } from '#/runescript-compiler/diagnostics/Diagnostic.js';
 import { DiagnosticMessage } from '#/runescript-compiler/diagnostics/DiagnosticMessage.js';
 import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
 import { DiagnosticType } from '#/runescript-compiler/diagnostics/DiagnosticType.js';
+
 import { TypeChecking } from '#/runescript-compiler/semantics/TypeChecking.js';
+
 import { BasicSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { TupleType } from '#/runescript-compiler/type/TupleType.js';
 import { Type } from '#/runescript-compiler/type/Type.js';
 import { TypeManager } from '#/runescript-compiler/type/TypeManager.js';
+
 import { Node } from '#/runescript-parser/ast/Node.js';
+
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
+import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
+import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
 
 /**
  * Contains the context of the [TypeChecking] and supplies useful functions when

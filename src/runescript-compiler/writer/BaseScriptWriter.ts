@@ -1,13 +1,18 @@
 import { Instruction } from '#/runescript-compiler/codegen/Instruction.js';
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { Block } from '#/runescript-compiler/codegen/script/Block.js';
 import { Label } from '#/runescript-compiler/codegen/script/Label.js';
 import { LocalTable, RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
 import { SwitchTable } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol, LocalVariableSymbol, RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
+
 import { ArrayType } from '#/runescript-compiler/type/wrapped/ArrayType.js';
+
 import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
 
 /**

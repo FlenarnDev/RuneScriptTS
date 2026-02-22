@@ -1,6 +1,7 @@
-import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
-import { Node } from '#/runescript-parser/ast/Node.js';
 import { DiagnosticType } from '#/runescript-compiler/diagnostics/DiagnosticType.js';
+
+import { Node } from '#/runescript-parser/ast/Node.js';
+import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 
 // TODO: Further documentation.
 export class Diagnostic {

@@ -1,45 +1,50 @@
-import { CalcExpression } from '#/runescript-parser/ast/expr/CalcExpression.js';
-import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
-import { ClientScriptExpression } from '#/runescript-parser/ast/expr/ClientScriptExpression.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
-import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
-import { IntegerLiteral } from '#/runescript-parser/ast/expr/literal/IntegerLiteral.js';
-import { JoinedStringExpression } from '#/runescript-parser/ast/expr/JoinedStringExpression.js';
-import { Literal } from '#/runescript-parser/ast/expr/literal/Literal.js';
-import { ParenthesizedExpression } from '#/runescript-parser/ast/expr/ParenthesizedExpression.js';
-import { StringPart } from '#/runescript-parser/ast/expr/StringPart.js';
 import { Node } from '#/runescript-parser/ast/Node.js';
 import { Parameter } from '#/runescript-parser/ast/Parameter.js';
-import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
+import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
+import { Script } from '#/runescript-parser/ast/Scripts.js';
 import { Token } from '#/runescript-parser/ast/Token.js';
-import { CoordLiteral } from '#/runescript-parser/ast/expr/literal/CoordLiteral.js';
-import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
-import { ProcCallExpression } from '#/runescript-parser/ast/expr/call/ProcCallExpression.js';
-import { JumpCallExpression } from '#/runescript-parser/ast/expr/call/JumpCallExpression.js';
-import { BooleanLiteral } from '#/runescript-parser/ast/expr/literal/BooleanLiteral.js';
-import { CharacterLiteral } from '#/runescript-parser/ast/expr/literal/CharacterLiteral.js';
-import { StringLiteral } from '#/runescript-parser/ast/expr/literal/StringLiteral.js';
-import { NullLiteral } from '#/runescript-parser/ast/expr/literal/NullLiteral.js';
-import { BinaryExpression } from '#/runescript-parser/ast/expr/BinaryExpression.js';
+
 import { ArithmeticExpression } from '#/runescript-parser/ast/expr/ArithmeticExpression.js';
+import { BinaryExpression } from '#/runescript-parser/ast/expr/BinaryExpression.js';
+import { CalcExpression } from '#/runescript-parser/ast/expr/CalcExpression.js';
+import { ClientScriptExpression } from '#/runescript-parser/ast/expr/ClientScriptExpression.js';
 import { ConditionExpression } from '#/runescript-parser/ast/expr/ConditionExpression.js';
-import { VariableExpression } from '#/runescript-parser/ast/expr/variable/VariableExpression.js';
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+import { JoinedStringExpression } from '#/runescript-parser/ast/expr/JoinedStringExpression.js';
+import { ParenthesizedExpression } from '#/runescript-parser/ast/expr/ParenthesizedExpression.js';
+import { StringPart } from '#/runescript-parser/ast/expr/StringPart.js';
+
 import { ConstantVariableExpression } from '#/runescript-parser/ast/expr/variable/ConstantVariableExpression.js';
 import { GameVariableExpression } from '#/runescript-parser/ast/expr/variable/GameVariableExpression.js';
 import { LocalVariableExpression } from '#/runescript-parser/ast/expr/variable/LocalVariableExpression.js';
-import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
-import { Script } from '#/runescript-parser/ast/Scripts.js';
-import { ReturnStatement } from '#/runescript-parser/ast/statement/ReturnStatement.js';
-import { EmptyStatement } from '#/runescript-parser/ast/statement/EmptyStatement.js';
-import { IfStatement } from '#/runescript-parser/ast/statement/IfStatement.js';
-import { DeclarationStatement } from '#/runescript-parser/ast/statement/DeclarationStatement.js';
+import { VariableExpression } from '#/runescript-parser/ast/expr/variable/VariableExpression.js';
+
+import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
+import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
+import { JumpCallExpression } from '#/runescript-parser/ast/expr/call/JumpCallExpression.js';
+import { ProcCallExpression } from '#/runescript-parser/ast/expr/call/ProcCallExpression.js';
+
+import { BooleanLiteral } from '#/runescript-parser/ast/expr/literal/BooleanLiteral.js';
+import { CharacterLiteral } from '#/runescript-parser/ast/expr/literal/CharacterLiteral.js';
+import { CoordLiteral } from '#/runescript-parser/ast/expr/literal/CoordLiteral.js';
+import { IntegerLiteral } from '#/runescript-parser/ast/expr/literal/IntegerLiteral.js';
+import { Literal } from '#/runescript-parser/ast/expr/literal/Literal.js';
+import { NullLiteral } from '#/runescript-parser/ast/expr/literal/NullLiteral.js';
+import { StringLiteral } from '#/runescript-parser/ast/expr/literal/StringLiteral.js';
+
+import { ArrayDeclarationStatement } from '#/runescript-parser/ast/statement/ArrayDeclarationStatement.js';
+import { AssignmentStatement } from '#/runescript-parser/ast/statement/AssignmentStatement.js';
 import { BlockStatement } from '#/runescript-parser/ast/statement/BlockStatement.js';
-import { WhileStatement } from '#/runescript-parser/ast/statement/WhileStatement.js';
+import { DeclarationStatement } from '#/runescript-parser/ast/statement/DeclarationStatement.js';
+import { EmptyStatement } from '#/runescript-parser/ast/statement/EmptyStatement.js';
 import { ExpressionStatement } from '#/runescript-parser/ast/statement/ExpressionStatement.js';
+import { IfStatement } from '#/runescript-parser/ast/statement/IfStatement.js';
+import { ReturnStatement } from '#/runescript-parser/ast/statement/ReturnStatement.js';
+import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 import { SwitchCase } from '#/runescript-parser/ast/statement/SwitchCase.js';
 import { SwitchStatement } from '#/runescript-parser/ast/statement/SwitchStatement.js';
-import { AssignmentStatement } from '#/runescript-parser/ast/statement/AssignmentStatement.js';
-import { ArrayDeclarationStatement } from '#/runescript-parser/ast/statement/ArrayDeclarationStatement.js';
+import { WhileStatement } from '#/runescript-parser/ast/statement/WhileStatement.js';
 
 export abstract class AstVisitor<R> {
     visitScriptFile(scriptFile: ScriptFile): R {

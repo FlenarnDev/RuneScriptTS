@@ -1,7 +1,9 @@
-import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
-import { Type } from '#/runescript-compiler/type/Type.js';
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol, ConstantSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
+import { Type } from '#/runescript-compiler/type/Type.js';
 
 export type SymbolType<T> = { kind: 'ServerScript'; type: TriggerType } | { kind: 'ClientScript'; type: TriggerType } | { kind: 'LocalVariable' } | { kind: 'Basic'; type: Type } | { kind: 'Constant' };
 

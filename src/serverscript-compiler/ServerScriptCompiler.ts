@@ -1,30 +1,38 @@
-import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
 import { ScriptCompiler } from '#/runescript-compiler/ScriptCompiler.js';
-import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
-import { Type } from '#/runescript-compiler/type/Type.js';
+
+import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
+import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { VarBitType, VarNpcType, VarPlayerType, VarSharedType } from '#/runescript-compiler/type/wrapped/GameVarType.js';
 
+import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
+
 import { CompilerTypeInfo } from '#/serverscript-compiler/CompilerTypeInfo.js';
-import { CompilerTypeInfoLoader } from '#/serverscript-compiler/CompilerTypeInfoLoader.js';
 import { CompilerTypeInfoConstantLoader } from '#/serverscript-compiler/CompilerTypeInfoConstantLoader.js';
+import { CompilerTypeInfoLoader } from '#/serverscript-compiler/CompilerTypeInfoLoader.js';
 import { CompilerTypeInfoProtectedLoader } from '#/serverscript-compiler/CompilerTypeInfoProtectedLoader.js';
 import { SymbolMapper } from '#/serverscript-compiler/SymbolMapper.js';
-import { DumpCommandHandler } from '#/serverscript-compiler/command/debug/DumpCommandHandler.js';
-import { LongQueueCommandHandler } from '#/serverscript-compiler/command/LongQueueCommandHandler.js';
-import { LongQueueVarArgCommandHandler } from '#/serverscript-compiler/command/LongQueueVarArgCommandHandler.js';
-import { QueueCommandHandler } from '#/serverscript-compiler/command/QueueCommandHandler.js';
-import { QueueVarArgCommandHandler } from '#/serverscript-compiler/command/QueueVarArgCommandHandler.js';
-import { ScriptCommandHandler } from '#/serverscript-compiler/command/debug/ScriptCommandHandler.js';
-import { TimerCommandHandler } from '#/serverscript-compiler/command/TimerCommandHandler.js';
-import { ParamCommandHandler } from '#/serverscript-compiler/command/ParamCommandHandler.js';
-import { ServerTriggerType } from '#/serverscript-compiler/trigger/ServerTriggerType.js';
-import { ParamType } from '#/serverscript-compiler/type/ParamType.js';
-import { ScriptVarType } from '#/serverscript-compiler/type/ScriptVarType.js';
-import { DbColumnType } from '#/serverscript-compiler/type/DbColumnType.js';
+
 import { DbFindCommandHandler } from '#/serverscript-compiler/command/DbFindCommandHandler.js';
 import { DbGetFieldCommandHandler } from '#/serverscript-compiler/command/DbGetFieldCommandHandler.js';
 import { EnumCommandHandler } from '#/serverscript-compiler/command/EnumCommandHandler.js';
+import { LongQueueCommandHandler } from '#/serverscript-compiler/command/LongQueueCommandHandler.js';
+import { LongQueueVarArgCommandHandler } from '#/serverscript-compiler/command/LongQueueVarArgCommandHandler.js';
+import { ParamCommandHandler } from '#/serverscript-compiler/command/ParamCommandHandler.js';
+import { QueueCommandHandler } from '#/serverscript-compiler/command/QueueCommandHandler.js';
+import { QueueVarArgCommandHandler } from '#/serverscript-compiler/command/QueueVarArgCommandHandler.js';
+import { TimerCommandHandler } from '#/serverscript-compiler/command/TimerCommandHandler.js';
+
+import { DumpCommandHandler } from '#/serverscript-compiler/command/debug/DumpCommandHandler.js';
+import { ScriptCommandHandler } from '#/serverscript-compiler/command/debug/ScriptCommandHandler.js';
+
+import { ServerTriggerType } from '#/serverscript-compiler/trigger/ServerTriggerType.js';
+
+import { DbColumnType } from '#/serverscript-compiler/type/DbColumnType.js';
+import { ParamType } from '#/serverscript-compiler/type/ParamType.js';
+import { ScriptVarType } from '#/serverscript-compiler/type/ScriptVarType.js';
 
 export class ServerScriptCompiler extends ScriptCompiler {
     private readonly symbols: Record<string, CompilerTypeInfo>;

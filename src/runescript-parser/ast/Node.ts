@@ -1,8 +1,9 @@
+import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
+import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Diagnostic } from '#/runescript-compiler/diagnostics/Diagnostic.js';
 import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
 import { DiagnosticType } from '#/runescript-compiler/diagnostics/DiagnosticType.js';
-import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 
 /**
  * The base [abstract syntax tree](https://en.wikipedia.org/wiki/Abstract_syntax_tree) node.

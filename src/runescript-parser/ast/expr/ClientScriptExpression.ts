@@ -1,9 +1,11 @@
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
-import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
+
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
+import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
 
 /**
  * A parsed ClientScript reference.

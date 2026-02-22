@@ -1,8 +1,12 @@
 import { PointerChecker } from '#/runescript-compiler/codegen/script/config/PointerChecker.js';
+
 import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
-import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
-import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
+import { Type } from '#/runescript-compiler/type/Type.js';
 
 /**
  * A script symbol is a type of symbol that defines any type of script. Each script

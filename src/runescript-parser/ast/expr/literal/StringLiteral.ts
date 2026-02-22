@@ -1,8 +1,11 @@
 import { RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+
 import { Literal } from '#/runescript-parser/ast/expr/literal/Literal.js';
 
 /**

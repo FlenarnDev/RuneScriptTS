@@ -1,18 +1,25 @@
+import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
+import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
+
+import { GraphGenerator } from '#/runescript-compiler/codegen/script/config/GraphGenerator.js';
+import { InstructionNode } from '#/runescript-compiler/codegen/script/config/InstructionNode.js';
+import { PointerInstructionNode } from '#/runescript-compiler/codegen/script/config/PointerInstructionNode.js';
+
 import { Diagnostic } from '#/runescript-compiler/diagnostics/Diagnostic.js';
 import { DiagnosticMessage } from '#/runescript-compiler/diagnostics/DiagnosticMessage.js';
 import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
 import { DiagnosticType } from '#/runescript-compiler/diagnostics/DiagnosticType.js';
+
 import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
 import { PointerType } from '#/runescript-compiler/pointer/PointerType.js';
+
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
 import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
 import { VarBitType, VarNpcType, VarPlayerType } from '#/runescript-compiler/type/wrapped/GameVarType.js';
-import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
-import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
-import { GraphGenerator } from '#/runescript-compiler/codegen/script/config/GraphGenerator.js';
-import { InstructionNode } from '#/runescript-compiler/codegen/script/config/InstructionNode.js';
-import { PointerInstructionNode } from '#/runescript-compiler/codegen/script/config/PointerInstructionNode.js';
 
 export class PointerChecker {
     /**

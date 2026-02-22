@@ -1,9 +1,11 @@
+import { LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { Node } from '#/runescript-parser/ast/Node.js';
-import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { Token } from '#/runescript-parser/ast/Token.js';
-import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 
 /**
  * Represent a single parameter in a [Script].

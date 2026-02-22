@@ -1,8 +1,11 @@
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
-import { VariableExpression } from '#/runescript-parser/ast/expr/variable/VariableExpression.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+
+import { VariableExpression } from '#/runescript-parser/ast/expr/variable/VariableExpression.js';
+
 import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 
 /**

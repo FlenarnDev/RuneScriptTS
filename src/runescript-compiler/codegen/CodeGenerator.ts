@@ -1,15 +1,55 @@
+import { Instruction } from '#/runescript-compiler/codegen/Instruction.js';
+import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
+import { Block } from '#/runescript-compiler/codegen/script/Block.js';
+import { Label } from '#/runescript-compiler/codegen/script/Label.js';
+import { LabelGenerator } from '#/runescript-compiler/codegen/script/LabelGenerator.js';
+import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
+import { SwitchCase } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
+import { CodeGeneratorContext } from '#/runescript-compiler/configuration/command/CodeGeneratorContext.js';
+import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
+
+import { DiagnosticMessage } from '#/runescript-compiler/diagnostics/DiagnosticMessage.js';
+import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
+
+import { ServerScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
+import { BasicSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
+import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
+
+import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
+import { MetaType } from '#/runescript-compiler/type/MetaType.js';
+import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
+import { TupleType } from '#/runescript-compiler/type/TupleType.js';
+
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
+import { Node } from '#/runescript-parser/ast/Node.js';
+import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+import { Parameter } from '#/runescript-parser/ast/Parameter.js';
+import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
+import { Script } from '#/runescript-parser/ast/Scripts.js';
+
 import { ArithmeticExpression } from '#/runescript-parser/ast/expr/ArithmeticExpression.js';
 import { BinaryExpression } from '#/runescript-parser/ast/expr/BinaryExpression.js';
 import { CalcExpression } from '#/runescript-parser/ast/expr/CalcExpression.js';
-import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
-import { JumpCallExpression } from '#/runescript-parser/ast/expr/call/JumpCallExpression.js';
-import { ProcCallExpression } from '#/runescript-parser/ast/expr/call/ProcCallExpression.js';
 import { ClientScriptExpression } from '#/runescript-parser/ast/expr/ClientScriptExpression.js';
 import { ConditionExpression } from '#/runescript-parser/ast/expr/ConditionExpression.js';
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 import { JoinedStringExpression } from '#/runescript-parser/ast/expr/JoinedStringExpression.js';
+import { ParenthesizedExpression } from '#/runescript-parser/ast/expr/ParenthesizedExpression.js';
+import { BasicStringPart, ExpressionStringPart, StringPart } from '#/runescript-parser/ast/expr/StringPart.js';
+
+import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
+import { JumpCallExpression } from '#/runescript-parser/ast/expr/call/JumpCallExpression.js';
+import { ProcCallExpression } from '#/runescript-parser/ast/expr/call/ProcCallExpression.js';
+
+import { ConstantVariableExpression } from '#/runescript-parser/ast/expr/variable/ConstantVariableExpression.js';
+import { GameVariableExpression } from '#/runescript-parser/ast/expr/variable/GameVariableExpression.js';
+import { LocalVariableExpression } from '#/runescript-parser/ast/expr/variable/LocalVariableExpression.js';
+
 import { BooleanLiteral } from '#/runescript-parser/ast/expr/literal/BooleanLiteral.js';
 import { CharacterLiteral } from '#/runescript-parser/ast/expr/literal/CharacterLiteral.js';
 import { CoordLiteral } from '#/runescript-parser/ast/expr/literal/CoordLiteral.js';
@@ -17,16 +57,7 @@ import { IntegerLiteral } from '#/runescript-parser/ast/expr/literal/IntegerLite
 import { Literal } from '#/runescript-parser/ast/expr/literal/Literal.js';
 import { NullLiteral } from '#/runescript-parser/ast/expr/literal/NullLiteral.js';
 import { StringLiteral } from '#/runescript-parser/ast/expr/literal/StringLiteral.js';
-import { ParenthesizedExpression } from '#/runescript-parser/ast/expr/ParenthesizedExpression.js';
-import { BasicStringPart, ExpressionStringPart, StringPart } from '#/runescript-parser/ast/expr/StringPart.js';
-import { ConstantVariableExpression } from '#/runescript-parser/ast/expr/variable/ConstantVariableExpression.js';
-import { GameVariableExpression } from '#/runescript-parser/ast/expr/variable/GameVariableExpression.js';
-import { LocalVariableExpression } from '#/runescript-parser/ast/expr/variable/LocalVariableExpression.js';
-import { Node } from '#/runescript-parser/ast/Node.js';
-import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
-import { Parameter } from '#/runescript-parser/ast/Parameter.js';
-import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
-import { Script } from '#/runescript-parser/ast/Scripts.js';
+
 import { ArrayDeclarationStatement } from '#/runescript-parser/ast/statement/ArrayDeclarationStatement.js';
 import { AssignmentStatement } from '#/runescript-parser/ast/statement/AssignmentStatement.js';
 import { BlockStatement } from '#/runescript-parser/ast/statement/BlockStatement.js';
@@ -37,25 +68,6 @@ import { IfStatement } from '#/runescript-parser/ast/statement/IfStatement.js';
 import { ReturnStatement } from '#/runescript-parser/ast/statement/ReturnStatement.js';
 import { SwitchStatement } from '#/runescript-parser/ast/statement/SwitchStatement.js';
 import { WhileStatement } from '#/runescript-parser/ast/statement/WhileStatement.js';
-import { CodeGeneratorContext } from '#/runescript-compiler/configuration/command/CodeGeneratorContext.js';
-import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
-import { DiagnosticMessage } from '#/runescript-compiler/diagnostics/DiagnosticMessage.js';
-import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
-import { ServerScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
-import { BasicSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
-import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
-import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
-import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
-import { MetaType } from '#/runescript-compiler/type/MetaType.js';
-import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
-import { TupleType } from '#/runescript-compiler/type/TupleType.js';
-import { Instruction } from '#/runescript-compiler/codegen/Instruction.js';
-import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
-import { Block } from '#/runescript-compiler/codegen/script/Block.js';
-import { Label } from '#/runescript-compiler/codegen/script/Label.js';
-import { LabelGenerator } from '#/runescript-compiler/codegen/script/LabelGenerator.js';
-import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
-import { SwitchCase } from '#/runescript-compiler/codegen/script/SwitchTable.js';
 
 export class CodeGenerator extends AstVisitor<void> {
     /**

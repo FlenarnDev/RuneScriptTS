@@ -1,7 +1,9 @@
 import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { Type as MainType } from '#/runescript-compiler/type/Type.js';
 import { MutableOptionsType, TypeOptions } from '#/runescript-compiler/type/TypeOptions.js';
+
 import { WrappedType } from '#/runescript-compiler/type/wrapped/WrappedType.js';
 
 /**

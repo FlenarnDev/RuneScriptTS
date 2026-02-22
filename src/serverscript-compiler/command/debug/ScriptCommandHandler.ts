@@ -1,10 +1,13 @@
-import { Script } from '#/runescript-parser/ast/Scripts.js';
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { CodeGeneratorContext } from '#/runescript-compiler/configuration/command/CodeGeneratorContext.js';
 import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
 import { TypeCheckingContext } from '#/runescript-compiler/configuration/command/TypeCheckingContext.js';
+
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';
+
+import { Script } from '#/runescript-parser/ast/Scripts.js';
 
 /**
  * Dynamic command handler that replaces the call with a string constant containing

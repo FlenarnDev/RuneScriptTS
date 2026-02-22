@@ -1,8 +1,10 @@
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
 import { VariableExpression } from '#/runescript-parser/ast/expr/variable/VariableExpression.js';
 
 export class LocalVariableExpression extends VariableExpression {

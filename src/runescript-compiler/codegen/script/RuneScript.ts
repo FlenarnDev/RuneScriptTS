@@ -1,8 +1,10 @@
-import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
-import { BasicSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
-import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
 import { Block } from '#/runescript-compiler/codegen/script/Block.js';
 import { SwitchTable } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
+import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
+import { BasicSymbol, LocalVariableSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
 
 /**
  * A representation of a script containing the blocks of instructions and switch tables.

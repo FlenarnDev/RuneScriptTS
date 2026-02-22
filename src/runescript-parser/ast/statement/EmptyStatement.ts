@@ -1,6 +1,7 @@
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 
 /**

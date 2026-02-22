@@ -1,9 +1,13 @@
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { CodeGeneratorContext } from '#/runescript-compiler/configuration/command/CodeGeneratorContext.js';
 import { DynamicCommandHandler } from '#/runescript-compiler/configuration/command/DynamicCommandHandler.js';
 import { TypeCheckingContext } from '#/runescript-compiler/configuration/command/TypeCheckingContext.js';
+
 import { SymbolType } from '#/runescript-compiler/symbol/SymbolType.js';
+
 import { CommandTrigger } from '#/runescript-compiler/trigger/CommandTrigger.js';
+
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
 import { PrimitiveType } from '#/runescript-compiler/type/PrimitiveType.js';

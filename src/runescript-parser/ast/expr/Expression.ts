@@ -1,4 +1,5 @@
 import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { Node } from '#/runescript-parser/ast/Node.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 

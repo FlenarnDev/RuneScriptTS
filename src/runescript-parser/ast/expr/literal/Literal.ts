@@ -1,4 +1,5 @@
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 
 /**

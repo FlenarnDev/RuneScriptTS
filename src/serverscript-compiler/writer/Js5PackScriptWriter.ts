@@ -3,6 +3,7 @@ import path from 'path';
 import zlib from 'zlib';
 
 import { IdProvider } from '#/runescript-compiler/writer/BaseScriptWriter.js';
+
 import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
 
 import { BinaryScriptWriter } from '#/serverscript-compiler/writer/BinaryScriptWriter.js';

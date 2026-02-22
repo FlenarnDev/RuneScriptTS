@@ -1,8 +1,10 @@
-import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
-import { BasicSymbol, LocalVariableSymbol, RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
-import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { Label } from '#/runescript-compiler/codegen/script/Label.js';
 import { SwitchTable } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
+import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
+import { BasicSymbol, LocalVariableSymbol, RuneScriptSymbol } from '#/runescript-compiler/symbol/Symbol.js';
+
+import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 
 /**
  * Represents a single bytecode opcode. Each opcode has a single operand type of [T].

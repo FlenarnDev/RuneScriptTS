@@ -1,16 +1,21 @@
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { BasicSymbol } from '#/runescript-compiler/symbol/Symbol.js';
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
 import { TriggerType } from '#/runescript-compiler/trigger/TriggerType.js';
+
 import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
 import { Node } from '#/runescript-parser/ast/Node.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { Parameter } from '#/runescript-parser/ast/Parameter.js';
-import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 import { Token } from '#/runescript-parser/ast/Token.js';
+
+import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
+import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 
 /**
  * A script declaration containing the header and code of a script.

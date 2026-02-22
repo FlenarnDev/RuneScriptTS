@@ -2,6 +2,7 @@ import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { Token } from '#/runescript-parser/ast/Token.js';
+
 import { BinaryExpression } from '#/runescript-parser/ast/expr/BinaryExpression.js';
 import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 

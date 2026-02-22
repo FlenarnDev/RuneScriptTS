@@ -1,12 +1,14 @@
 import { resolve } from 'path';
 
-import { PointerType } from '#/runescript-compiler/pointer/PointerType.js';
 import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
+import { PointerType } from '#/runescript-compiler/pointer/PointerType.js';
+
 import { ScriptWriter } from '#/runescript-compiler/writer/ScriptWriter.js';
 
 import { CompilerTypeInfo } from '#/serverscript-compiler/CompilerTypeInfo.js';
 import { ServerScriptCompiler } from '#/serverscript-compiler/ServerScriptCompiler.js';
 import { SymbolMapper } from '#/serverscript-compiler/SymbolMapper.js';
+
 import { JagFileScriptWriter } from '#/serverscript-compiler/writer/JagFileScriptWriter.js';
 import { Js5PackScriptWriter } from '#/serverscript-compiler/writer/Js5PackScriptWriter.js';
 

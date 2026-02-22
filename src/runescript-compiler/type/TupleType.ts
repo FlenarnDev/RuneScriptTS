@@ -1,6 +1,6 @@
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
-import { Type } from '#/runescript-compiler/type/Type.js';
 import { MetaType } from '#/runescript-compiler/type/MetaType.js';
+import { Type } from '#/runescript-compiler/type/Type.js';
 import { MutableOptionsType, TypeOptions } from '#/runescript-compiler/type/TypeOptions.js';
 
 /**

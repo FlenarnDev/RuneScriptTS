@@ -1,9 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 
+import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
+
 import { IdProvider } from '#/runescript-compiler/writer/BaseScriptWriter.js';
 import { BinaryScriptWriter } from '#/serverscript-compiler/writer/BinaryScriptWriter.js';
-import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
 
 /**
  * An implementation of [BinaryScriptWriter] that writes the scripts to [output].

@@ -1,9 +1,12 @@
 import { RuneScript } from '#/runescript-compiler/codegen/script/RuneScript.js';
+
 import { BaseVarType } from '#/runescript-compiler/type/BaseVarType.js';
 import { TupleType } from '#/runescript-compiler/type/TupleType.js';
+
 import { BaseScriptWriter, BaseScriptWriterContext } from '#/runescript-compiler/writer/BaseScriptWriter.js';
 
 import { ServerScriptOpcode } from '#/serverscript-compiler/ServerScriptOpcode.js';
+
 import { ServerTriggerType } from '#/serverscript-compiler/trigger/ServerTriggerType.js';
 
 export class BinaryScriptWriterContext extends BaseScriptWriterContext {

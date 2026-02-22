@@ -1,5 +1,6 @@
 import { SymbolLoader } from '#/runescript-compiler/configuration/SymbolLoader.js';
 import { ScriptCompiler } from '#/runescript-compiler/ScriptCompiler.js';
+
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
 
 import { CompilerTypeInfo } from '#/serverscript-compiler/CompilerTypeInfo.js';

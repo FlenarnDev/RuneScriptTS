@@ -1,14 +1,19 @@
-import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
-import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
-import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
-import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 import { CodeGenerator } from '#/runescript-compiler/codegen/CodeGenerator.js';
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { Diagnostics } from '#/runescript-compiler/diagnostics/Diagnostics.js';
+
 import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
 import { Node } from '#/runescript-parser/ast/Node.js';
+import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+import { Identifier } from '#/runescript-parser/ast/expr/Identifier.js';
+
+import { CallExpression } from '#/runescript-parser/ast/expr/call/CallExpression.js';
+import { CommandCallExpression } from '#/runescript-parser/ast/expr/call/CommandCallExpression.js';
 
 /**
  * Contains the context of the [CodeGenerator] and supplies useful functions when

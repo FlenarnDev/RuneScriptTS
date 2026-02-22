@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
 
-import { CharStream, CommonTokenStream, ANTLRErrorListener, ParserRuleContext } from 'antlr4ng';
+import { ANTLRErrorListener, CharStream, CommonTokenStream, ParserRuleContext } from 'antlr4ng';
 
 import { RuneScriptLexer } from '#/antlr/RuneScriptLexer.js';
 import { RuneScriptParser } from '#/antlr/RuneScriptParser.js';
@@ -9,6 +9,7 @@ import { RuneScriptParser } from '#/antlr/RuneScriptParser.js';
 import { Node } from '#/runescript-parser/ast/Node.js';
 import { ScriptFile } from '#/runescript-parser/ast/ScriptFile.js';
 import { Script } from '#/runescript-parser/ast/Scripts.js';
+
 import { AstBuilder } from '#/runescript-parser/parser/AstBuilder.js';
 
 export class ScriptParser {

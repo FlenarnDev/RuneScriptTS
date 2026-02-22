@@ -1,9 +1,12 @@
 import { SymbolTable } from '#/runescript-compiler/symbol/SymbolTable.js';
+
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
-import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
 import { Node } from '#/runescript-parser/ast/Node.js';
 import { NodeKind } from '#/runescript-parser/ast/NodeKind.js';
 import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
+
+import { Expression } from '#/runescript-parser/ast/expr/Expression.js';
+
 import { Statement } from '#/runescript-parser/ast/statement/Statement.js';
 
 /**

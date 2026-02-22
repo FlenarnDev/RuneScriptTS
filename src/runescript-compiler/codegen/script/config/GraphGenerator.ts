@@ -1,12 +1,16 @@
-import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
-import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 import { Instruction } from '#/runescript-compiler/codegen/Instruction.js';
 import { Opcode } from '#/runescript-compiler/codegen/Opcode.js';
+
 import { Block } from '#/runescript-compiler/codegen/script/Block.js';
 import { Label } from '#/runescript-compiler/codegen/script/Label.js';
 import { SwitchTable } from '#/runescript-compiler/codegen/script/SwitchTable.js';
+
 import { InstructionNode } from '#/runescript-compiler/codegen/script/config/InstructionNode.js';
 import { PointerInstructionNode } from '#/runescript-compiler/codegen/script/config/PointerInstructionNode.js';
+
+import { PointerHolder } from '#/runescript-compiler/pointer/PointerHolder.js';
+
+import { ScriptSymbol } from '#/runescript-compiler/symbol/ScriptSymbol.js';
 
 export class GraphGenerator {
     private readonly commandPointers: Map<string, PointerHolder>;

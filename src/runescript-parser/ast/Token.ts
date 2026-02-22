@@ -1,6 +1,6 @@
-import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
-import { Node } from '#/runescript-parser/ast/Node.js';
 import { AstVisitor } from '#/runescript-parser/ast/AstVisitor.js';
+import { Node } from '#/runescript-parser/ast/Node.js';
+import type { NodeSourceLocation } from '#/runescript-parser/ast/NodeSourceLocation.js';
 
 /**
  * A simple node that contains an antlr [org.antlr.v4.runtime.Token] text.

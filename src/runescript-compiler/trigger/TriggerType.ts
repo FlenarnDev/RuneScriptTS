@@ -1,6 +1,8 @@
 import { PointerType } from '#/runescript-compiler/pointer/PointerType.js';
-import { Type } from '#/runescript-compiler/type/Type.js';
+
 import { SubjectMode } from '#/runescript-compiler/trigger/SubjectMode.js';
+
+import { Type } from '#/runescript-compiler/type/Type.js';
 
 /**
  * A trigger type of a script. The trigger type is the first part of a script declaration (`[trigger,_]`) where
