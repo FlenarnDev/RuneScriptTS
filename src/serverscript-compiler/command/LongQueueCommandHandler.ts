@@ -19,7 +19,7 @@ export class LongQueueCommandHandler implements DynamicCommandHandler {
         context.checkArgument(2, PrimitiveType.INT); // Int arg to pass to script.
         context.checkArgument(3, PrimitiveType.INT); // Action to perform if logout succeeds mid-queue.
 
-        // TODO: (Type safety) Make sure queu script only execute up to 1 int arg (parameterType).
+        // TODO: (Type safety) Make sure queue script only expects up to 1 int arg (parameterType).
 
         const expectedTypesList: Type[] = [this.queueType, PrimitiveType.INT, PrimitiveType.INT, PrimitiveType.INT];
 

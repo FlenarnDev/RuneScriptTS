@@ -209,7 +209,7 @@ export class TypeChecking extends AstVisitor<void> {
         if (invalidExpression == null) {
             /**
              * Visit expression and type check it, we don't visit outside this because we don't want
-             * to report type mistmatches AND invalid condition at the same time.
+             * to report type mismatches AND invalid condition at the same time.
              */
             this.visitNodeOrNull(expression);
             this.checkTypeMatch(expression, PrimitiveType.BOOLEAN, expression.type ?? MetaType.Error);
@@ -254,7 +254,7 @@ export class TypeChecking extends AstVisitor<void> {
         this.checkTypeMatch(condition, expectedType, condition.type ?? MetaType.Error);
 
         /**
-         * TODO: Check for duplicate case lables (other than default).
+         * TODO: Check for duplicate case labels (other than default).
          * Visit all the cases, cases will be type checked here.
          */
         let defaultCase: SwitchCase | null = null;
@@ -311,7 +311,7 @@ export class TypeChecking extends AstVisitor<void> {
         if (expression instanceof StringLiteral) {
             /**
              * We need to special case this since it's possible for a string literal to have been
-             * transformed intoa another expression tpye (e.g graphic or clientscript).
+             * transformed into another expression type (e.g graphic or clientscript).
              */
             const sub = expression.subExpression;
             return sub == null || this.isConstantExpression(sub);
@@ -323,7 +323,7 @@ export class TypeChecking extends AstVisitor<void> {
 
         if (expression instanceof Identifier) {
             const ref = expression.reference;
-            return ref == null || this.isConstantSymobl(ref);
+            return ref == null || this.isConstantSymbol(ref);
         }
 
         return false;
@@ -332,7 +332,7 @@ export class TypeChecking extends AstVisitor<void> {
     /**
      * Checks if the value of [symbol] is known at compile time.
      */
-    private isConstantSymobl(symbol: RuneScriptSymbol): boolean {
+    private isConstantSymbol(symbol: RuneScriptSymbol): boolean {
         return symbol instanceof BasicSymbol || symbol instanceof ConstantSymbol;
     }
 
@@ -407,7 +407,7 @@ export class TypeChecking extends AstVisitor<void> {
     override visitAssignmentStatement(assignmentStatement: AssignmentStatement): void {
         const vars = assignmentStatement.vars;
 
-        // Visist the lhs to fetch the references.
+        // Visit the lhs to fetch the references.
         this.visitNodes(vars);
 
         // Store the lhs types to help with the type hinting.
@@ -876,7 +876,7 @@ export class TypeChecking extends AstVisitor<void> {
             return;
         }
 
-        // Add the symbol to the set of constants being evalutated.
+        // Add the symbol to the set of constants being evaluated.
         this.constantsBeingEvaluated.add(symbol);
 
         try {
@@ -911,7 +911,7 @@ export class TypeChecking extends AstVisitor<void> {
                 return;
             }
 
-            // Set the sub-expresssion to the parser expression and the type to the parsed expressions type.
+            // Set the sub-expression to the parser expression and the type to the parsed expressions type.
             constantVariableExpression.subExpression = parsedExpression;
             constantVariableExpression.type = parsedExpression.type;
         } finally {
@@ -950,10 +950,10 @@ export class TypeChecking extends AstVisitor<void> {
         const hint = stringLiteral.typeHint;
 
         /**
-         * These ugle conditions are here to enable special cases.
+         * These ugly conditions are here to enable special cases.
          * 1) If the hint is a hook.
          * 2) If the hint is not a string, and not any of the other types
-         *    representable by a literal expression. It shoould be possible to
+         *    representable by a literal expression. It should be possible to
          *    reference a symbol via quoting it, this enables the ability to reference
          *    a symbol without it being a valid identifier.
          */
@@ -1100,7 +1100,7 @@ export class TypeChecking extends AstVisitor<void> {
     private symbolToType(symbol: RuneScriptSymbol): Type | null {
         if (symbol instanceof ScriptSymbol) {
             if (symbol.trigger === CommandTrigger) {
-                // Only commands can be referenced by an indentifier and return a value
+                // Only commands can be referenced by an identifier and return a value
                 return symbol.returns;
             } else {
                 // All other triggers get wrapped in a script type.

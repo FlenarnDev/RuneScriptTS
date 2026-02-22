@@ -423,7 +423,7 @@ export class AstBuilder extends RuneScriptParserVisitor<Node> {
 
     private visitNode<T extends Node>(ctx: ParserRuleContext | null | undefined): T {
         if (!ctx) {
-            throw new Error('Expected parser context but recieved null/undefined.');
+            throw new Error('Expected parser context but received null/undefined.');
         }
 
         return this.visit(ctx) as T;

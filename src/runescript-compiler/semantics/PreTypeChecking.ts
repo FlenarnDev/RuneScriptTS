@@ -379,8 +379,8 @@ export class PreTypeChecking extends AstVisitor<void> {
         if (trigger && !trigger.allowReturns && scriptReturns !== MetaType.Nothing) {
             script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_NO_RETURNS, trigger.identifier);
         } else if (triggerReturns && scriptReturns !== triggerReturns) {
-            const exprectedReturnTypes = triggerReturns.representation;
-            script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_RETURNS, script.trigger.text, exprectedReturnTypes);
+            const expectedReturnTypes = triggerReturns.representation;
+            script.reportError(this.diagnostics, DiagnosticMessage.SCRIPT_TRIGGER_EXPECTED_RETURNS, script.trigger.text, expectedReturnTypes);
         }
     }
 
@@ -394,7 +394,7 @@ export class PreTypeChecking extends AstVisitor<void> {
             parameter.reportError(this.diagnostics, DiagnosticMessage.GENERIC_INVALID_TYPE, typeText);
         }
 
-        // Attempt to inster the local variable into the symbol talbe and display error if failed to insert.
+        // Attempt to insert the local variable into the symbol table and display error if failed to insert.
         const symbol = new LocalVariableSymbol(name, type ?? MetaType.Error);
         const inserted = this.table.insert(SymbolType.localVariable(), symbol);
 
@@ -429,10 +429,10 @@ export class PreTypeChecking extends AstVisitor<void> {
         // Visit the condition to resolve any reference.
         switchStatement.condition.accept(this);
 
-        // Visis the cases to resolve references in them.
+        // Visit the cases to resolve references in them.
         this.visit(switchStatement.cases);
 
-        // Set the expected tyep of the switch case.
+        // Set the expected type of the switch case.
         switchStatement.type = type ?? MetaType.Error;
     }
 

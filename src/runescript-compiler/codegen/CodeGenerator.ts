@@ -457,7 +457,7 @@ export class CodeGenerator extends AstVisitor<void> {
             this.visitNodeOrNull(first.index);
         }
 
-        // Visist the expressions from the left side.
+        // Visit the expressions from the left side.
         this.visitNodes(assignmentStatement.expressions);
 
         // Loop through the variables in reverse

@@ -29,10 +29,10 @@ export class DbGetFieldCommandHandler implements DynamicCommandHandler {
         context.checkArgument(2, PrimitiveType.INT);
 
         // Typehint the second argument using the dbcolumn type if it was valid.
-        const columntReturnType = (columnExpr?.type as DbColumnType)?.inner;
+        const columnReturnType = (columnExpr?.type as DbColumnType)?.inner;
 
         // Define the expected types based on what is currently known.
-        const expectedTypes = new TupleType(ScriptVarType.DBROW, new DbColumnType(columntReturnType ?? MetaType.Any), PrimitiveType.INT);
+        const expectedTypes = new TupleType(ScriptVarType.DBROW, new DbColumnType(columnReturnType ?? MetaType.Any), PrimitiveType.INT);
 
         // Compare the expected types with the actual types.
         if (!context.checkArgumentTypes(expectedTypes)) {
@@ -49,6 +49,6 @@ export class DbGetFieldCommandHandler implements DynamicCommandHandler {
         }
 
         // Set the return type.
-        context.expression.type = columntReturnType;
+        context.expression.type = columnReturnType;
     }
 }

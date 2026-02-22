@@ -37,7 +37,7 @@ export class DbFindCommandHandler implements DynamicCommandHandler {
             context.checkArgumentTypes(expectedTypes);
         }
 
-        // Set the retunr type
+        // Set the return type
         context.expression.type = this.withCount ? PrimitiveType.INT : MetaType.Unit;
     }
 

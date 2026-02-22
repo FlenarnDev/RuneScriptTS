@@ -36,7 +36,7 @@ export class ArrayType implements WrappedType {
     }
 
     get defaultValue(): never {
-        throw new Error('ArrayType hass no default value.');
+        throw new Error('ArrayType has no default value.');
     }
 
     toString(): string {
