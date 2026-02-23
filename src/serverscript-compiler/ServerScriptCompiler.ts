@@ -117,6 +117,8 @@ export class ServerScriptCompiler extends ScriptCompiler {
 
         this.addSymLoader('model', ScriptVarType.MODEL);
         this.addSymLoader('synth', ScriptVarType.SYNTH);
+        this.addSymLoader('midi', ScriptVarType.MIDI);
+        this.addSymLoader('jingle', ScriptVarType.JINGLE);
 
         // September 2004
         this.types.register('varbit', new VarBitType(MetaType.Any));
